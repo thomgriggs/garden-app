@@ -1,0 +1,2393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>St. Pete Garden Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --soil:#3d2b1f;--leaf:#2d5016;--leaf-mid:#4a7c23;--leaf-light:#7fb23a;
+  --leaf-pale:#b8d97a;--sun:#e8a020;--sun-pale:#f5d78e;--terracotta:#c4612a;
+  --cream:#faf6ee;--parchment:#f0e8d8;--fog:#e8e0d4;--ink:#1a1208;
+  --ink-light:#6b5740;--ink-pale:#a08060;
+  --cell:clamp(40px,10vw,54px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);font-weight:300;line-height:1.7;overflow-x:hidden}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:var(--soil);display:flex;align-items:center;padding:0 1rem;height:52px;border-bottom:2px solid var(--terracotta);gap:.5rem}
+.nav-logo{font-family:'Playfair Display',serif;font-size:15px;color:var(--sun-pale);letter-spacing:.03em;white-space:nowrap;margin-right:auto}
+.nav-tabs{display:flex;gap:2px;flex-shrink:0}
+.nav-tab{padding:6px 14px;border:none;border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:400;letter-spacing:.04em;cursor:pointer;background:transparent;color:rgba(255,255,255,.55);transition:all .15s;white-space:nowrap}
+.nav-tab:hover{color:var(--sun-pale);background:rgba(255,255,255,.08)}
+.nav-tab.active{background:var(--terracotta);color:#fff;font-weight:500}
+.nav-admin{color:rgba(255,255,255,.45);text-decoration:none;font-size:11px;padding:5px 10px;border:1px solid rgba(255,255,255,.15);border-radius:5px;white-space:nowrap;transition:all .15s;margin-left:.25rem;flex-shrink:0}
+.nav-admin:hover{color:var(--sun-pale);border-color:rgba(255,255,255,.3)}
+@media(max-width:480px){.nav-logo{display:none}.nav-tab{padding:6px 10px;font-size:11px}.nav-admin{padding:5px 8px;font-size:10px}}
+/* PAGES */
+.page-view{display:none}.page-view.active{display:block}
+/* HERO */
+.hero{background:var(--soil);padding:clamp(2rem,6vw,5rem) 1.25rem clamp(1.5rem,4vw,4rem);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 50%,rgba(74,124,35,.18) 0%,transparent 50%),radial-gradient(circle at 80% 30%,rgba(232,160,32,.12) 0%,transparent 40%)}
+.hero-inner{max-width:860px;margin:0 auto;position:relative}
+.hero-eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--leaf-light);margin-bottom:.75rem;font-weight:400}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,5vw,3.8rem);color:var(--cream);line-height:1.15;margin-bottom:1rem}
+.hero h1 em{color:var(--sun-pale);font-style:italic}
+.hero-desc{font-size:clamp(12px,3vw,16px);color:#e8e0d4;max-width:520px;margin-bottom:1.5rem}
+.hero-tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{display:inline-flex;align-items:center;font-size:11px;padding:4px 10px;border-radius:20px;font-weight:400}
+.tag-green{background:rgba(45,80,22,.6);color:var(--leaf-pale);border:1px solid rgba(127,178,58,.3)}
+.tag-amber{background:rgba(196,97,42,.4);color:var(--sun-pale);border:1px solid rgba(232,160,32,.3)}
+
+/* SECTIONS */
+section{padding:clamp(2rem,5vw,3.5rem) clamp(1rem,4vw,2rem)}
+section:nth-child(even){background:var(--parchment)}
+.section-inner{max-width:960px;margin:0 auto}
+.section-eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--terracotta);margin-bottom:.4rem;font-weight:500}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.2rem,4vw,2.2rem);color:var(--ink);margin-bottom:.4rem;line-height:1.2}
+.section-desc{font-size:13px;color:var(--ink-light);margin-bottom:1.5rem;max-width:660px;line-height:1.6}
+
+/* CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.5rem}
+.stat{background:var(--soil);border-radius:10px;padding:.75rem 1rem}
+.stat .val{font-family:'Playfair Display',serif;font-size:clamp(18px,4vw,26px);color:var(--sun-pale)}
+.stat .lbl{font-size:11px;color:#e8e0d4;letter-spacing:.05em;margin-top:2px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
+.info-card{background:var(--cream);border:1px solid var(--fog);border-radius:10px;padding:1rem 1.1rem}
+.info-card h4{font-family:'Playfair Display',serif;font-size:14px;margin-bottom:.4rem;color:var(--ink)}
+.info-card p,.info-card li{font-size:12px;color:var(--ink-light);line-height:1.6}
+.info-card ul{padding-left:1.1rem}
+.info-card li{margin-bottom:2px}
+
+/* TABS */
+.tab-nav{display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid var(--fog);padding-bottom:8px;margin-bottom:1.25rem}
+.tab-btn{padding:6px 12px;border:1px solid var(--fog);border-radius:6px;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:400;letter-spacing:.04em;cursor:pointer;background:transparent;color:var(--ink-light);transition:all .15s;white-space:nowrap}
+.tab-btn:hover{border-color:var(--leaf-mid);color:var(--leaf)}
+.tab-btn.active{background:var(--soil);color:var(--sun-pale);border-color:var(--soil)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* BEDS */
+.bed-wrap{background:var(--cream);border:1px solid var(--fog);border-radius:12px;padding:1rem;margin-bottom:1.25rem}
+.bed-name{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink)}
+.bed-meta{font-size:11px;color:var(--ink-pale);margin-top:1px;margin-bottom:.75rem}
+.bed-body{display:flex;gap:1.25rem;flex-wrap:wrap;align-items:flex-start}
+.grid-area{flex-shrink:0;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.compass-label{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-pale);margin-bottom:3px}
+.grid-row{display:flex;gap:2px;margin-bottom:2px}
+.gcell{
+  width:var(--cell);height:var(--cell);
+  border-radius:4px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  border:1px solid rgba(0,0,0,.06);position:relative;
+  transition:transform .12s,box-shadow .12s;
+  flex-shrink:0;overflow:hidden;
+  cursor:pointer;
+}
+.gcell:hover{transform:scale(1.08);z-index:10;box-shadow:0 3px 12px rgba(0,0,0,.2)}
+.gcell.edit-mode:hover{outline:2px solid var(--sun);outline-offset:1px}
+.gcell canvas{width:72%;height:72%;image-rendering:pixelated}
+.gcell-lbl{font-size:max(6.5px,min(7.5px,1.5vw));font-weight:500;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7);margin-top:1px;text-align:center;line-height:1.1;padding:0 1px}
+.gcell-count{position:absolute;top:2px;right:2px;font-size:max(5px,min(7px,1.2vw));font-weight:500;background:rgba(0,0,0,.45);color:#fff;border-radius:3px;padding:0 2px;line-height:1.4}
+.gcell-void{background:var(--parchment) !important;border:1px dashed var(--fog) !important;cursor:default}
+.gcell-void:hover{transform:none;box-shadow:none}
+.bed-info{flex:1;min-width:min(180px,100%)}
+.legend{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:.6rem}
+.leg-item{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--ink-light);background:var(--parchment);border-radius:4px;padding:2px 6px}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.companion-box{background:var(--parchment);border-left:3px solid var(--leaf-mid);border-radius:0 8px 8px 0;padding:8px 10px;font-size:11px;color:var(--ink-light);line-height:1.55;margin-bottom:.6rem}
+.companion-box strong{color:var(--ink);font-weight:500}
+.count-row{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:.6rem}
+.count-cell{background:var(--parchment);border-radius:4px;padding:4px 7px;font-size:10px;display:flex;justify-content:space-between}
+.count-cell span:first-child{color:var(--ink-light)}
+.count-cell span:last-child{font-weight:500;color:var(--ink)}
+.stagger-box{border:1px solid var(--fog);border-radius:8px;padding:8px 10px}
+.stagger-title{font-size:10px;font-weight:500;color:var(--ink);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+.stagger-row{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.stagger-wk{font-size:9px;min-width:56px;color:var(--ink-pale)}
+.stagger-bar{height:6px;border-radius:3px}
+.stagger-note{font-size:9px;color:var(--ink-pale)}
+
+/* TILE SWAP PALETTE */
+.edit-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+.edit-toggle-btn{padding:6px 14px;border:1px solid var(--fog);border-radius:6px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;background:transparent;color:var(--ink-light);transition:all .15s;display:flex;align-items:center;gap:6px}
+.edit-toggle-btn.active{background:var(--sun);color:var(--soil);border-color:var(--sun);font-weight:500}
+.edit-toggle-btn .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.7}
+.palette-wrap{display:none;background:var(--parchment);border:1px solid var(--fog);border-radius:10px;padding:.75rem;margin-bottom:.75rem}
+.palette-wrap.visible{display:block}
+.palette-title{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-pale);margin-bottom:.5rem}
+.palette-groups{display:flex;flex-direction:column;gap:.5rem}
+.palette-group-label{font-size:10px;color:var(--ink-pale);margin-bottom:3px;font-weight:500}
+.palette-row{display:flex;flex-wrap:wrap;gap:6px}
+.ptile{
+  width:46px;height:46px;border-radius:5px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;cursor:pointer;
+  border:2px solid transparent;transition:all .12s;flex-shrink:0;position:relative;
+}
+.ptile:hover{transform:scale(1.1);z-index:5}
+.ptile.selected{border-color:var(--sun);box-shadow:0 0 0 2px var(--sun-pale)}
+.ptile canvas{width:26px;height:26px;image-rendering:pixelated}
+.ptile-lbl{font-size:6px;font-weight:500;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7);text-align:center;line-height:1.1;margin-top:1px}
+.ptile-count{position:absolute;top:1px;right:2px;font-size:6px;background:rgba(0,0,0,.45);color:#fff;border-radius:2px;padding:0 2px}
+.erase-tile{background:var(--parchment);border:1px dashed var(--fog) !important;color:var(--ink-pale)}
+.palette-hint{font-size:10px;color:var(--ink-pale);margin-top:.5rem;font-style:italic}
+.edit-undo-btn{padding:5px 10px;border:1px solid var(--fog);border-radius:6px;font-size:10px;font-family:'DM Sans',sans-serif;cursor:pointer;background:transparent;color:var(--ink-pale);transition:all .15s}
+.edit-undo-btn:hover{border-color:var(--terracotta);color:var(--terracotta)}
+.selected-indicator{font-size:11px;color:var(--ink-light);display:flex;align-items:center;gap:5px}
+.selected-swatch{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+
+/* SEASON TOGGLE */
+.season-toggle{display:flex;align-items:center;gap:10px;margin-bottom:.75rem}
+.toggle-track{width:44px;height:24px;border-radius:12px;background:var(--leaf-mid);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:none;padding:0}
+.toggle-track.off{background:var(--terracotta)}
+.toggle-knob{position:absolute;width:18px;height:18px;border-radius:50%;background:var(--cream);top:3px;left:3px;transition:transform .2s;pointer-events:none}
+.toggle-track:not(.off) .toggle-knob{transform:translateX(20px)}
+.toggle-label{font-size:12px;color:var(--ink-light)}
+.toggle-label strong{color:var(--ink)}
+
+/* SUN */
+.sun-bed{margin-bottom:.9rem}
+.sun-label{display:flex;justify-content:space-between;font-size:12px;color:var(--ink);margin-bottom:3px;flex-wrap:wrap;gap:4px}
+.sun-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:400}
+.sun-green{background:rgba(45,80,22,.15);color:var(--leaf)}
+.sun-amber{background:rgba(232,160,32,.15);color:#7a4a00}
+.sun-track{height:8px;border-radius:4px;background:var(--fog);overflow:hidden;margin-bottom:3px}
+.sun-fill{height:100%;border-radius:4px;background:var(--sun)}
+.sun-note{font-size:11px;color:var(--ink-pale);line-height:1.5}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:1rem}
+.time-table{width:100%;font-size:11px;border-collapse:collapse;min-width:480px}
+.time-table th{text-align:left;font-weight:500;font-size:10px;color:var(--ink-pale);padding:5px 7px;border-bottom:1px solid var(--fog);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.time-table td{padding:6px 7px;border-bottom:1px solid var(--fog);vertical-align:top;color:var(--ink-light)}
+.time-table td:first-child{color:var(--ink);font-weight:400;white-space:nowrap}
+.soil-ratio-bar{display:flex;height:20px;border-radius:5px;overflow:hidden;margin:.6rem 0}
+.soil-seg{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;color:rgba(255,255,255,.9)}
+
+/* CALENDAR */
+.cal-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cal-header-row{display:flex;align-items:center;margin-bottom:2px;padding-left:90px}
+.cal-month-lbl{flex:1;font-size:9px;text-align:center;color:var(--ink-pale);min-width:22px}
+.cal-row{display:flex;align-items:center;margin-bottom:2px;min-width:420px}
+.cal-row-label{width:90px;font-size:11px;color:var(--ink-light);flex-shrink:0;font-weight:400;padding-right:6px}
+.cal-segment{flex:1;height:16px;border-radius:2px;min-width:22px}
+.cal-legend{display:flex;gap:12px;margin-top:.75rem;font-size:10px;color:var(--ink-light);flex-wrap:wrap}
+.cal-leg{display:flex;align-items:center;gap:4px}
+.cal-leg-dot{width:16px;height:7px;border-radius:2px}
+
+/* BANANA */
+.banana-body{display:flex;gap:1.25rem;flex-wrap:wrap;align-items:flex-start}
+.btl-box{border:1px solid var(--fog);border-radius:8px;padding:.9rem;flex:1;min-width:200px}
+.btl-title{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-pale);margin-bottom:.6rem}
+.btl-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.btl-month{font-size:10px;min-width:76px;color:var(--ink-pale)}
+.btl-bar{height:7px;border-radius:3px}
+.btl-note{font-size:10px;color:var(--ink-light)}
+.note-box{background:var(--parchment);border-left:3px solid var(--sun);border-radius:0 8px 8px 0;padding:8px 10px;font-size:11px;color:var(--ink-light);line-height:1.55;margin-top:.6rem}
+
+/* CARE TABLES */
+.schedule-table{width:100%;border-collapse:collapse;font-size:12px}
+.schedule-table th{text-align:left;font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-pale);padding:6px 8px;border-bottom:1px solid var(--fog);white-space:nowrap}
+.schedule-table td{padding:6px 8px;border-bottom:1px solid var(--fog);color:var(--ink-light);vertical-align:top}
+.schedule-table td:first-child{color:var(--ink);font-weight:400}
+.badge{display:inline-block;font-size:9px;padding:2px 6px;border-radius:8px;margin:1px}
+.b-green{background:rgba(45,80,22,.12);color:var(--leaf)}
+.b-amber{background:rgba(232,160,32,.12);color:#7a4a00}
+.b-red{background:rgba(196,97,42,.12);color:var(--terracotta)}
+
+/* THIS WEEK */
+.week-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:.75rem}
+.task-card{background:var(--cream);border:1px solid var(--fog);border-radius:10px;padding:clamp(.75rem,3vw,.85rem) clamp(.75rem,3vw,1rem);display:flex;gap:10px;align-items:flex-start;cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:transparent}
+.task-card:hover{border-color:var(--leaf-mid)}
+.task-card.done{opacity:.5}
+.task-card.done .task-title{text-decoration:line-through}
+.task-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--fog);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.task-card.done .task-check{background:var(--leaf-mid);border-color:var(--leaf-mid)}
+.task-check svg{display:none}
+.task-card.done .task-check svg{display:block}
+.task-title{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:2px}
+.task-detail{font-size:11px;color:var(--ink-light);line-height:1.5}
+.task-tag{font-size:9px;padding:2px 6px;border-radius:8px;display:inline-block;margin-bottom:3px}
+.tag-urgent{background:rgba(196,97,42,.12);color:var(--terracotta)}
+.tag-plant{background:rgba(45,80,22,.12);color:var(--leaf)}
+.tag-water{background:rgba(24,95,165,.12);color:#185FA5}
+.tag-harvest{background:rgba(232,160,32,.15);color:#7a4a00}
+
+/* TRACKER */
+.tracker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:.75rem}
+.plant-card{background:var(--cream);border:1px solid var(--fog);border-radius:10px;padding:.9rem 1rem}
+.plant-card-header{display:flex;align-items:center;gap:8px;margin-bottom:.6rem}
+.plant-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.plant-card-name{font-size:13px;font-weight:500;color:var(--ink)}
+.plant-card-bed{font-size:10px;color:var(--ink-pale);margin-left:auto}
+.health-bar-wrap{margin-bottom:.4rem}
+.health-label{display:flex;justify-content:space-between;font-size:10px;color:var(--ink-light);margin-bottom:2px}
+.health-track{height:6px;border-radius:3px;background:var(--fog);overflow:hidden}
+.health-fill{height:100%;border-radius:3px;transition:width .3s}
+.notes-input{width:100%;border:1px solid var(--fog);border-radius:6px;padding:5px 8px;font-size:11px;font-family:'DM Sans',sans-serif;background:var(--parchment);color:var(--ink);resize:none;margin-top:.4rem;outline:none;transition:border-color .15s}
+.notes-input:focus{border-color:var(--leaf-mid)}
+.health-stars{display:flex;gap:3px;margin-bottom:.4rem}
+.star{width:20px;height:20px;cursor:pointer;font-size:15px;opacity:.25;transition:opacity .15s;line-height:20px;text-align:center;-webkit-tap-highlight-color:transparent}
+.star.lit{opacity:1}
+
+/* LOG */
+.log-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.75rem}@media(max-width:480px){.log-form-grid{grid-template-columns:1fr}}
+@media(max-width:520px){.log-form-grid{grid-template-columns:1fr}}
+.log-input{border:1px solid var(--fog);border-radius:6px;padding:7px 10px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);outline:none;width:100%}
+.log-input:focus{border-color:var(--leaf-mid)}
+.log-select{border:1px solid var(--fog);border-radius:6px;padding:7px 10px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);outline:none;width:100%;appearance:none;-webkit-appearance:none}
+.log-btn{width:100%;padding:8px 18px;background:var(--soil);color:var(--sun-pale);border:none;border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s;margin-top:4px}
+.log-btn:hover{opacity:.85}
+.log-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.log-table{width:100%;border-collapse:collapse;font-size:12px;min-width:380px}
+.log-table th{text-align:left;font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-pale);padding:5px 7px;border-bottom:1px solid var(--fog);white-space:nowrap}
+.log-table td{padding:6px 7px;border-bottom:1px solid var(--fog);color:var(--ink-light);vertical-align:top}
+.log-table td:first-child{color:var(--ink);white-space:nowrap}
+.log-type-badge{font-size:9px;padding:2px 6px;border-radius:8px;white-space:nowrap}
+.log-water{background:rgba(24,95,165,.1);color:#185FA5}
+.log-harvest{background:rgba(232,160,32,.15);color:#7a4a00}
+.log-note{background:rgba(45,80,22,.1);color:var(--leaf)}
+.log-pest{background:rgba(196,97,42,.12);color:var(--terracotta)}
+.log-empty{color:var(--ink-pale);font-size:12px;padding:1.25rem 0;text-align:center}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--ink-pale);font-size:13px;padding:2px 4px;transition:color .15s}
+.del-btn:hover{color:var(--terracotta)}
+
+/* E-BED CANVAS */
+.ebed-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:.75rem}
+.ebed-canvas{display:block}
+
+/* OPTIMIZER */
+.opt-btn{padding:6px 14px;border:1px solid var(--leaf-mid);border-radius:6px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;background:transparent;color:var(--leaf);transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.opt-btn:hover{background:var(--leaf-mid);color:#fff}
+.opt-btn.running{opacity:.6;pointer-events:none}
+.alerts-panel{margin-bottom:1rem;display:none}
+.alerts-panel.visible{display:block}
+.alerts-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;flex-wrap:wrap;gap:6px}
+.alerts-title{font-size:12px;font-weight:500;color:var(--ink)}
+.alerts-count{font-size:11px;color:var(--ink-pale)}
+.alerts-list{display:flex;flex-direction:column;gap:6px}
+.alert-card{border-radius:8px;padding:9px 11px;font-size:11px;line-height:1.55;display:flex;gap:8px;align-items:flex-start;background:var(--cream);border:1px solid var(--fog)}
+.alert-card.error{border-left:3px solid #E24B4A;background:#fff8f7}
+.alert-card.warning{border-left:3px solid var(--sun);background:#fffbf2}
+.alert-card.info{border-left:3px solid #185FA5;background:#f5f8ff}
+.alert-swatch{width:10px;height:10px;border-radius:2px;flex-shrink:0;margin-top:2px}
+.alert-body{flex:1}
+.alert-msg{color:var(--ink);font-weight:400;margin-bottom:2px}
+.alert-fix{color:var(--ink-pale);font-style:italic}
+.alert-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;padding:1px 5px;border-radius:6px;font-weight:500;margin-left:4px;vertical-align:middle}
+.badge-error{background:#fdecea;color:#E24B4A}
+.badge-warning{background:#fff3db;color:#7a4a00}
+.badge-info{background:#e8eeff;color:#185FA5}
+.opt-preview{border:1px solid var(--fog);border-radius:10px;overflow:hidden;margin-bottom:1rem;display:none}
+.opt-preview.visible{display:block}
+.opt-preview-header{background:var(--parchment);padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--fog);flex-wrap:wrap;gap:8px}
+.opt-preview-title{font-size:12px;font-weight:500;color:var(--ink)}
+.opt-preview-actions{display:flex;gap:6px}
+.opt-accept-btn{padding:5px 14px;background:var(--leaf-mid);color:#fff;border:none;border-radius:6px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s}
+.opt-accept-btn:hover{opacity:.85}
+.opt-reject-btn{padding:5px 12px;background:transparent;color:var(--ink-light);border:1px solid var(--fog);border-radius:6px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
+.opt-reject-btn:hover{border-color:var(--terracotta);color:var(--terracotta)}
+.opt-preview-grids{display:flex;gap:1rem;padding:1rem;flex-wrap:wrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.opt-grid-wrap{flex:1;min-width:0}
+.opt-grid-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-pale);margin-bottom:.4rem}
+.opt-diff-count{font-size:11px;color:var(--leaf);margin-top:.4rem}
+.no-alerts{font-size:12px;color:var(--ink-pale);padding:.75rem;text-align:center;background:var(--parchment);border-radius:8px}
+.alert-fix-btn{margin-top:6px;padding:4px 10px;background:transparent;border:1px solid var(--fog);border-radius:5px;font-size:10px;font-family:'DM Sans',sans-serif;cursor:pointer;color:var(--leaf);transition:all .15s;display:inline-block}
+.alert-fix-btn:hover{background:var(--leaf-mid);color:#fff;border-color:var(--leaf-mid)}
+.alert-fix-btn:disabled{opacity:.4;cursor:default}
+.badge-ok{background:rgba(45,80,22,.12);color:var(--leaf);font-size:10px;padding:1px 6px;border-radius:6px;font-weight:400}
+
+/* SOIL & FERT PANEL */
+.soil-fert-panel{background:var(--parchment);border:1px solid var(--fog);border-radius:10px;padding:.9rem 1rem;margin-top:1rem}
+.sf-title{font-size:11px;font-weight:500;color:var(--ink);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.75rem;display:flex;align-items:center;gap:6px;color:var(--leaf)}
+.sf-row{display:flex;gap:10px;align-items:flex-start;padding:.6rem 0;border-bottom:.5px solid var(--fog)}
+.sf-row:last-child{border-bottom:none;padding-bottom:0}
+.sf-swatch{width:12px;height:12px;border-radius:3px;flex-shrink:0;margin-top:3px}
+.sf-body{flex:1;min-width:0}
+.sf-plant{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:3px}
+.sf-soil{font-size:11px;color:var(--ink-light);line-height:1.5;margin-bottom:2px;display:flex;gap:5px;align-items:baseline;flex-wrap:wrap}
+.sf-tag{display:inline-flex;font-size:10px;padding:1px 6px;border-radius:4px;font-weight:400;white-space:nowrap;flex-shrink:0}
+.sf-soil-tag{background:rgba(61,43,31,.1);color:var(--soil)}
+.sf-fert-tag{background:rgba(45,80,22,.1);color:var(--leaf)}
+/* GROW BAGS */
+.growbag-section{margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--fog)}
+.growbag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:.75rem;margin-top:.75rem}
+.growbag-card{background:var(--cream);border:1px solid var(--fog);border-radius:10px;padding:.9rem 1rem;position:relative}
+.growbag-card-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem}
+.growbag-icon{width:36px;height:36px;border-radius:8px;background:var(--soil);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+.growbag-name{font-size:13px;font-weight:500;color:var(--ink)}
+.growbag-meta{font-size:11px;color:var(--ink-pale);margin-top:1px}
+.growbag-gallon{position:absolute;top:.6rem;right:.75rem;font-size:10px;font-weight:500;background:var(--soil);color:var(--sun-pale);padding:2px 8px;border-radius:10px}
+.growbag-soil{font-size:11px;color:var(--ink-light);line-height:1.55;margin-top:.4rem;padding-top:.4rem;border-top:.5px solid var(--fog)}
+.growbag-soil-lbl{font-weight:500;color:var(--ink);display:block;margin-bottom:2px}
+.growbag-add-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:.75rem;border:1.5px dashed var(--fog);border-radius:10px;cursor:pointer;font-size:12px;color:var(--ink-pale);background:transparent;width:100%;font-family:'DM Sans',sans-serif;transition:all .15s}
+.growbag-add-btn:hover{border-color:var(--leaf-mid);color:var(--leaf);background:rgba(74,124,35,.04)}
+.gb-modal-backdrop{position:fixed;inset:0;background:rgba(26,18,8,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
+.gb-modal-backdrop.hidden{display:none}
+.gb-modal{background:var(--cream);border-radius:14px;padding:1.5rem;max-width:480px;width:100%;max-height:90vh;overflow-y:auto}
+.gb-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem}
+.gb-modal-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink)}
+.gb-close{background:none;border:none;cursor:pointer;font-size:20px;color:var(--ink-pale);padding:2px 6px}
+.gallon-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:.4rem}
+.gpill{padding:5px 14px;border:1px solid var(--fog);border-radius:20px;font-size:12px;cursor:pointer;background:transparent;color:var(--ink-light);font-family:'DM Sans',sans-serif;transition:all .12s}
+.gpill.active{background:var(--soil);color:var(--sun-pale);border-color:var(--soil)}
+
+footer{background:var(--soil);color:#e8e0d4;text-align:center;padding:1.5rem;font-size:11px}
+footer span{color:var(--leaf-light)}
+
+/* GLOBAL TOOLTIP */
+@media(max-width:600px){
+  .bed-body{flex-direction:column}
+  .bed-info{min-width:0;width:100%}
+  :root{--cell:clamp(36px,11vw,48px)}
+  .companion-box{font-size:10px}
+  .count-row{grid-template-columns:1fr}
+  .stagger-note{display:none}
+  .hero h1{font-size:clamp(1.6rem,7vw,2.4rem)}
+  .section-title{font-size:clamp(1.1rem,5vw,1.8rem)}
+}
+@media(max-width:380px){
+  :root{--cell:34px}
+  .gcell-lbl{font-size:5.5px}
+  .gcell-count{font-size:5px}
+}
+#global-tip{position:fixed;background:var(--soil);color:var(--cream);border-radius:8px;padding:9px 11px;font-size:11px;line-height:1.5;max-width:200px;pointer-events:none;display:none;z-index:9999;border:1px solid var(--terracotta);box-shadow:0 4px 16px rgba(0,0,0,.25)}
+#global-tip strong{color:var(--sun-pale);display:block;margin-bottom:2px;font-size:12px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.fade-in{animation:fadeUp .45s ease forwards;opacity:0}
+.fade-in:nth-child(1){animation-delay:.05s}.fade-in:nth-child(2){animation-delay:.1s}
+.fade-in:nth-child(3){animation-delay:.15s}.fade-in:nth-child(4){animation-delay:.2s}
+.fade-in:nth-child(5){animation-delay:.25s}.fade-in:nth-child(6){animation-delay:.3s}
+</style>
+</head>
+<body>
+<div id="global-tip"></div>
+
+<nav>
+  <div class="nav-logo">St. Pete Garden</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchPage('plan')">Plan</button>
+    <button class="nav-tab" onclick="switchPage('grow')">Grow</button>
+    <button class="nav-tab" onclick="switchPage('track')">Track</button>
+    <button class="nav-tab" onclick="switchPage('garden')">My Garden</button>
+  </div>
+  <a href="garden_admin.html" class="nav-admin">⚙ Setup</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Saint Petersburg, Florida · USDA Zone 10a</div>
+    <h1>Your backyard<br><em>kitchen garden</em></h1>
+    <p class="hero-desc">Complete growing guide for your 4 raised beds — companion planting, seasonal calendar, banana grove, and a live garden tracker.</p>
+    <div class="hero-tags">
+      <span class="tag tag-green">4 raised beds</span>
+      <span class="tag tag-green">Year-round growing</span>
+      <span class="tag tag-amber">Square-foot method</span>
+      <span class="tag tag-amber">Tap to swap tiles</span>
+      <span class="tag tag-green">Zone 10a</span>
+    </div>
+  </div>
+</div>
+
+<div class="page-view active" id="page-plan">
+  <section id="overview">
+  <div class="section-inner">
+    <div class="section-eyebrow">At a glance</div>
+    <div class="section-title">Your garden system</div>
+    <div class="stat-row">
+      <div class="stat fade-in"><div class="val">10a</div><div class="lbl">USDA zone</div></div>
+      <div class="stat fade-in"><div class="val">Year-round</div><div class="lbl">Growing potential</div></div>
+      <div class="stat fade-in"><div class="val">4 beds</div><div class="lbl">Total raised beds</div></div>
+      <div class="stat fade-in"><div class="val">Jan 28</div><div class="lbl">Avg last frost</div></div>
+      <div class="stat fade-in"><div class="val">91°F</div><div class="lbl">Avg summer high</div></div>
+      <div class="stat fade-in"><div class="val">52°F</div><div class="lbl">Avg winter low</div></div>
+    </div>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="showTab('season','cool')">Cool season (Oct–Mar)</button>
+      <button class="tab-btn" onclick="showTab('season','warm')">Warm season (Mar–Sep)</button>
+    </div>
+    <div id="tab-season-cool" class="tab-panel active">
+      <div class="card-grid">
+        <div class="info-card"><h4>The best growing window</h4><p>October through March is your prime season. Leafy greens, brassicas, root vegs and herbs explode with production. Fewer pests, cooler nights.</p><div style="margin-top:.6rem;display:flex;flex-wrap:wrap;gap:3px"><span class="badge b-green">Kale</span><span class="badge b-green">Spinach</span><span class="badge b-green">Arugula</span><span class="badge b-green">Cabbage</span><span class="badge b-green">Carrots</span><span class="badge b-green">Cilantro</span><span class="badge b-green">Onion</span><span class="badge b-green">Garlic</span></div></div>
+        <div class="info-card"><h4>Key dates</h4><ul><li>Start transplants indoors: early September</li><li>Move outside: first week of October</li><li>Peak harvest: November–February</li><li>Wind down: late March before bolt</li><li>Solarize beds: May–July</li></ul></div>
+      </div>
+    </div>
+    <div id="tab-season-warm" class="tab-panel">
+      <div class="card-grid">
+        <div class="info-card"><h4>Heat season strategy</h4><p>Spring window Feb–May is great for tomatoes and peppers. Most cool-season greens bolt by May. Bed D handles heat-lovers year-round.</p><div style="margin-top:.6rem;display:flex;flex-wrap:wrap;gap:3px"><span class="badge b-amber">Tomato</span><span class="badge b-amber">Pepper</span><span class="badge b-amber">Basil</span><span class="badge b-amber">Cantaloupe</span><span class="badge b-red">Summer gap Jun–Sep</span></div></div>
+        <div class="info-card"><h4>Summer survivors</h4><ul><li>Everglades tomato — native, very prolific</li><li>Sweet 100 cherry tomato</li><li>Any pepper variety</li><li>Basil — thrives in heat</li><li>Sweet potato (great addition)</li><li>Okra — loves FL heat</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BEDS -->
+  <section id="beds">
+  <div class="section-inner">
+    <div class="section-eyebrow">Square-foot method</div>
+    <div class="section-title">Bed layouts</div>
+    <div class="section-desc">Each cell = 1 square foot. Number badge = plants or seeds per sq ft. Tap <strong>Edit tiles</strong> to swap any plant, then tap a cell to place your selection.</div>
+    <div id="beds-abc"></div>
+    <!-- BED D -->
+    <div class="bed-wrap" id="bedD-wrap">
+      <div class="bed-name">Bed D — E-shape custom bed</div>
+      <div class="bed-meta">South backyard · past pool · full sun 8–10 hrs · muscadine trellis along south fence</div>
+      <div class="season-toggle">
+        <button class="toggle-track" id="bedD-toggle" onclick="toggleBedDSeason()"><div class="toggle-knob"></div></button>
+        <span class="toggle-label" id="bedD-label"><strong>Warm season</strong> — tomato, pepper, cantaloupe, basil</span>
+      </div>
+      <div class="edit-toolbar" id="bedD-toolbar"></div>
+      <div class="palette-wrap" id="bedD-palette"></div>
+      <div class="bed-body">
+        <div class="grid-area">
+          <div class="compass-label">South fence ↑ · pool ↓ · hover/tap for info</div>
+          <div class="ebed-scroll"><canvas id="ebed" class="ebed-canvas"></canvas></div>
+        </div>
+        <div class="bed-info">
+          <div class="legend" id="ebed-legend"></div>
+          <div class="companion-box"><strong>E-shape:</strong> Top 2 rows = full back bar along south fence. Bottom 2 rows = three 4×4 arms pointing toward pool with open access pockets between. The muscadine trellis (4×4 posts, 3 wire levels) runs directly behind the back bar along the fence.</div>
+          <div class="companion-box" style="border-left-color:var(--sun)"><strong>Companions:</strong> Tomato + basil + marigold trio. Borage corners deter hornworms. Nasturtium front tips trap aphids. Marigold border suppresses nematodes. Cantaloupe vines in center arm can be trained up to the muscadine trellis posts along the south fence.</div>
+          <div class="count-row" id="ebed-counts"></div>
+          <div class="stagger-box">
+            <div class="stagger-title">Succession schedule</div>
+            <div class="stagger-row"><span class="stagger-wk">Feb wk2</span><div class="stagger-bar" style="background:#7A1515;width:70%"></div><span class="stagger-note">Tomato transplants</span></div>
+            <div class="stagger-row"><span class="stagger-wk">Feb wk3</span><div class="stagger-bar" style="background:#805800;width:55%"></div><span class="stagger-note">Cantaloupe sow, trellis to fence</span></div>
+            <div class="stagger-row"><span class="stagger-wk">Mar wk1</span><div class="stagger-bar" style="background:#053528;width:60%"></div><span class="stagger-note">Basil fill-in direct sow</span></div>
+            <div class="stagger-row"><span class="stagger-wk">Sep wk1</span><div class="stagger-bar" style="background:#A32D2D;width:90%"></div><span class="stagger-note">Fall tomato replant</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUN & SOIL -->
+  <section id="trellis">
+  <div class="section-inner">
+    <div class="section-eyebrow">South fence · behind Bed D</div>
+    <div class="section-title">Muscadine grape trellis</div>
+    <div class="section-desc">Four 4×4×10 ft pressure-treated posts set 6 ft on center along the south fence, with three levels of No. 9 galvanized wire at 2, 4, and 6 ft. One vine trained up the center, cordons running both directions along the top wire.</div>
+    <div class="card-grid">
+      <div class="info-card"><h4>Materials</h4><ul>
+        <li><strong>Posts:</strong> 4 × pressure-treated 4×4×10 ft · concrete footings · 2 ft buried</li>
+        <li><strong>Wire:</strong> No. 9 gauge high-tensile galvanized · Gripple tensioners</li>
+        <li><strong>Wire heights:</strong> 2 ft (low catch) · 4 ft (mid catch) · 6 ft (top cordon)</li>
+        <li><strong>Post spacing:</strong> 6 ft on center · total run ~18 ft</li>
+        <li><strong>Vine placement:</strong> 1 vine planted center-span between posts 2 and 3</li>
+      </ul></div>
+      <div class="info-card"><h4>Training system</h4><ul>
+        <li><strong>System:</strong> High cordon — trunk grows to top wire (6 ft)</li>
+        <li><strong>Year 1:</strong> Train single trunk straight up bamboo stake to top wire</li>
+        <li><strong>Year 2:</strong> Cut trunk tip at wire, train two cordons in opposite directions</li>
+        <li><strong>Ongoing:</strong> Hanging shoots drape down from cordons to catch wires</li>
+        <li><strong>Winter prune:</strong> Cut back to 2–3 buds per spur each January</li>
+      </ul></div>
+      <div class="info-card"><h4>Recommended varieties</h4><ul>
+        <li><strong>Florida Fry</strong> — self-fertile · large bronze berry · best FL flavor</li>
+        <li><strong>Carlos</strong> — self-fertile · heavy producer · pairs perfectly with Fry</li>
+        <li><strong>Southern Home</strong> — ornamental purple · very productive</li>
+        <li>Plant one at each end of trellis for max yield · 8–10 ft apart</li>
+      </ul></div>
+      <div class="info-card"><h4>Soil & fertilizer</h4><ul>
+        <li><strong>Soil:</strong> Sandy loam · pH 5.5–6.5 · no high calcium</li>
+        <li><strong>Amend:</strong> Sulfur if pH above 6.5 · excellent drainage essential</li>
+        <li><strong>Feed:</strong> 10-10-10 balanced Feb & June</li>
+        <li><strong>At berry set:</strong> High-potassium application</li>
+        <li><strong>Avoid:</strong> Excess nitrogen — promotes foliage over fruit</li>
+      </ul></div>
+    </div>
+    <div class="table-scroll" style="margin-top:1.25rem">
+      <table class="schedule-table">
+        <tr><th>Month</th><th>Task</th></tr>
+        <tr><td>Jan–Feb</td><td>Dormant pruning — cut back to 2–3 buds per spur. Most important maintenance task.</td></tr>
+        <tr><td>Feb</td><td>First fertilizer — 10-10-10 balanced as buds swell</td></tr>
+        <tr><td>Mar–Apr</td><td>Bud break · begin shoot training to catch wires</td></tr>
+        <tr><td>May–Jun</td><td>Rapid shoot growth · train weekly · second fertilizer application</td></tr>
+        <tr><td>Jul–Aug</td><td>Berries forming · high-potassium fertilizer · watch for black rot</td></tr>
+        <tr><td>Sep–Oct</td><td>Harvest when berries drop easily with gentle touch · do not rush</td></tr>
+        <tr><td>Nov–Dec</td><td>Dormancy begins · stop all fertilizing</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- BANANA -->
+  <section id="banana">
+  <div class="section-inner">
+    <div class="section-eyebrow">Elsewhere on property</div>
+    <div class="section-title">Banana bundle (mat) planting</div>
+    <div class="section-desc">A banana mat = 1 mother + 2 sword suckers kept. Give each mat a 10 ft clearance radius. The south fence line now runs the muscadine trellis — place banana mats in another sunny location with wind protection.</div>
+    <div class="banana-body">
+      <div style="flex-shrink:0;max-width:240px">
+        <div class="compass-label" style="margin-bottom:6px">Mat layout — viewed from above</div>
+        <svg width="220" height="200" viewBox="0 0 220 200" role="img">
+          <title>Banana mat spacing diagram</title>
+          <circle cx="110" cy="100" r="90" fill="none" stroke="var(--fog)" stroke-width="1" stroke-dasharray="5 3"/>
+          <circle cx="110" cy="100" r="60" fill="var(--parchment)" opacity=".6"/>
+          <circle cx="110" cy="100" r="18" fill="#2d5016" opacity=".9"/>
+          <text style="font-size:9px;fill:white;font-family:DM Sans,sans-serif" x="110" y="104" text-anchor="middle">Mother</text>
+          <circle cx="144" cy="72" r="12" fill="#4a7c23" opacity=".85"/>
+          <text style="font-size:8px;fill:white;font-family:DM Sans,sans-serif" x="144" y="76" text-anchor="middle">S1</text>
+          <circle cx="76" cy="132" r="10" fill="#7fb23a" opacity=".85"/>
+          <text style="font-size:8px;fill:white;font-family:DM Sans,sans-serif" x="76" y="136" text-anchor="middle">S2</text>
+          <line x1="110" y1="100" x2="110" y2="10" stroke="var(--fog)" stroke-width=".5" marker-end="none"/>
+          <text style="font-size:9px;fill:var(--ink-pale);font-family:DM Sans,sans-serif" x="126" y="58">10 ft</text>
+          <text style="font-size:9px;fill:var(--ink-pale);font-family:DM Sans,sans-serif" x="110" y="192" text-anchor="middle">clearance radius</text>
+        </svg>
+        <div class="legend" style="margin-top:6px;flex-direction:column;gap:4px">
+          <div class="leg-item"><div class="leg-dot" style="background:#2d5016"></div>Mother plant</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#4a7c23"></div>Sword sucker 1 (keep)</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#7fb23a"></div>Sword sucker 2 (keep)</div>
+        </div>
+      </div>
+      <div class="btl-box">
+        <div class="btl-title">Growth & harvest timeline</div>
+        <div class="btl-row"><span class="btl-month">Plant now</span><div class="btl-bar" style="background:#2d5016;width:55%"></div><span class="btl-note">Plant mother 1 ft deep · amend hole with 30L compost · full sun spot</span></div>
+        <div class="btl-row"><span class="btl-month">Month 1–2</span><div class="btl-bar" style="background:#2d5016;width:30%"></div><span class="btl-note">Remove all water suckers (broad leaves) · keep 2 sword suckers only</span></div>
+        <div class="btl-row"><span class="btl-month">Month 3–6</span><div class="btl-bar" style="background:#4a7c23;width:60%"></div><span class="btl-note">Rapid growth · water 2×/week · monthly high-potassium fertilizer</span></div>
+        <div class="btl-row"><span class="btl-month">Month 9–12</span><div class="btl-bar" style="background:#e8a020;width:82%"></div><span class="btl-note">Flower emerges from center · stop disturbing roots</span></div>
+        <div class="btl-row"><span class="btl-month">Month 12–15</span><div class="btl-bar" style="background:#c4612a;width:100%"></div><span class="btl-note">Harvest · ripen indoors 5–10 days · cut mother to ground after</span></div>
+        <div class="note-box"><strong>Mat spacing:</strong> 10 ft clearance radius per mat. Roots spread 10–18 ft at maturity — don't plant near structures or other mats.</div>
+        <div class="note-box" style="border-left-color:var(--leaf-mid);margin-top:.5rem"><strong>Sucker selection:</strong> Keep only <em>sword suckers</em> — narrow pointed leaves, firm rhizome attachment. Remove all <em>water suckers</em> (broad floppy leaves, weak attachment) immediately — they fruit poorly. Stagger heights: keep one tall sucker (3–4 ft) and one short (1–2 ft) for continuous production. After harvest cut mother to ground — the tall sword sucker becomes the new mother.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CARE -->
+</div>
+
+<div class="page-view" id="page-grow">
+  <section id="sun">
+  <div class="section-inner">
+    <div class="section-eyebrow">Light & growing medium</div>
+    <div class="section-title">Sun & soil guide</div>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="showTab('sunsoil','sun')">Sun</button>
+      <button class="tab-btn" onclick="showTab('sunsoil','soil')">Soil mix</button>
+      <button class="tab-btn" onclick="showTab('sunsoil','testing')">Testing & feeding</button>
+    </div>
+    <div id="tab-sunsoil-sun" class="tab-panel active">
+      <div class="sun-bed"><div class="sun-label"><span>Bed D — south backyard</span><span class="sun-badge sun-green">8–10 hrs/day</span></div><div class="sun-track"><div class="sun-fill" style="width:90%"></div></div><div class="sun-note">Unobstructed open sky. Best all-day sun. Ideal for tomatoes, peppers, cantaloupe.</div></div>
+      <div class="sun-bed"><div class="sun-label"><span>Beds A & B — east fence</span><span class="sun-badge sun-amber">5–7 hrs/day</span></div><div class="sun-track"><div class="sun-fill" style="width:60%"></div></div><div class="sun-note">Full AM sun. House blocks PM sun after 2–3 PM. Ideal for leafy greens, herbs, root vegs.</div></div>
+      <div class="sun-bed"><div class="sun-label"><span>Bed C — round bed</span><span class="sun-badge sun-amber">5–6 hrs/day</span></div><div class="sun-track"><div class="sun-fill" style="width:54%"></div></div><div class="sun-note">Similar to A/B. Perfect for compact herbs and green onion year-round.</div></div>
+      <div class="table-scroll"><table class="time-table"><tr><th>Time</th><th>Season</th><th>Bed D</th><th>Beds A/B/C</th></tr><tr><td>6–8 AM</td><td>All year</td><td>Low angle, partial</td><td>Direct east sun begins</td></tr><tr><td>8–11 AM</td><td>All year</td><td>Full sun</td><td>Full direct sun</td></tr><tr><td>11 AM–2 PM</td><td>All year</td><td>Peak full sun</td><td>Overhead, strong light</td></tr><tr><td>2–5 PM</td><td>All year</td><td>Full sun</td><td>House shadow encroaches</td></tr><tr><td>5–7 PM</td><td>Summer</td><td>Low angle, partial</td><td>Mostly shaded</td></tr></table></div>
+    </div>
+    <div id="tab-sunsoil-soil" class="tab-panel">
+      <div class="card-grid">
+        <div class="info-card"><h4>Florida soil reality</h4><p>St. Pete sits on sandy soil with low organic matter. Great for raised beds — full control. Never use native sandy soil inside raised beds. Target pH: 6.0–7.0.</p></div>
+        <div class="info-card"><h4>Recommended mix (Mel's Mix)</h4><div class="soil-ratio-bar"><div class="soil-seg" style="flex:1;background:#c4a882">Coir</div><div class="soil-seg" style="flex:1;background:#4a7c23">Compost</div><div class="soil-seg" style="flex:1;background:#b4b2a9">Vermiculite</div></div><ul><li>1/3 coconut coir — retention</li><li>1/3 blended compost — nutrients</li><li>1/3 coarse vermiculite — drainage</li></ul></div>
+      </div>
+    </div>
+    <div id="tab-sunsoil-testing" class="tab-panel">
+      <div class="card-grid">
+        <div class="info-card"><h4>Soil testing</h4><ul><li><strong>UF/IFAS Pinellas Extension</strong> — ~$7. Most accurate. Do this first.</li><li><strong>Luster Leaf Rapitest</strong> — ~$20. Monthly spot checks.</li><li><strong>Bluelab pH Pen</strong> — ~$65. Digital meter.</li></ul></div>
+        <div class="info-card"><h4>Fertilizer schedule</h4><ul><li><strong>At planting:</strong> Slow-release granular (Osmocote)</li><li><strong>Every 2 weeks:</strong> Fish emulsion</li><li><strong>Monthly:</strong> Cal-Mag — prevents blossom end rot</li><li><strong>Each season:</strong> Worm castings top-dress</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALENDAR -->
+  <section id="calendar">
+  <div class="section-inner">
+    <div class="section-eyebrow">When to plant</div>
+    <div class="section-title">Planting calendar</div>
+    <div class="section-desc">Green = plant or sow · Amber = ongoing / harvest · Gray = rest. Scroll right on mobile.</div>
+    <div class="cal-wrap" id="calendar-container"></div>
+  </div>
+</section>
+
+<!-- MUSCADINE TRELLIS -->
+  <section id="care">
+  <div class="section-inner">
+    <div class="section-eyebrow">Ongoing maintenance</div>
+    <div class="section-title">Care schedule</div>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="showTab('care','water')">Watering</button>
+      <button class="tab-btn" onclick="showTab('care','tasks')">Monthly</button>
+      <button class="tab-btn" onclick="showTab('care','pests')">Pests</button>
+      <button class="tab-btn" onclick="showTab('care','pruning')">Pruning</button>
+    </div>
+    <div id="tab-care-water" class="tab-panel active">
+      <div class="table-scroll"><table class="schedule-table"><tr><th>Season</th><th>Frequency</th><th>Amount</th><th>Best time</th></tr><tr><td>Cool (Oct–Mar)</td><td>Every 2–3 days</td><td>1 in/week</td><td>7–9 AM</td></tr><tr><td>Spring (Apr–May)</td><td>Daily or every other</td><td>1–1.5 in/week</td><td>Morning</td></tr><tr><td>Summer (Jun–Sep)</td><td>Daily — check soil</td><td>1.5–2 in/week</td><td>AM only — never PM</td></tr></table></div>
+      <div class="note-box" style="margin-top:.75rem">Raised beds dry 2× faster than in-ground in FL heat. Stick finger 2 inches in — if dry, water. Drip on a 6 AM timer is the gold standard.</div>
+    </div>
+    <div id="tab-care-tasks" class="tab-panel">
+      <div class="table-scroll"><table class="schedule-table"><tr><th>Task</th><th>Frequency</th><th>Details</th></tr><tr><td>Soil pH test</td><td>Every 6 months</td><td>Before each major season (Sep & Mar)</td></tr><tr><td>Liquid fertilize</td><td>Every 2 weeks</td><td>Fish emulsion during active growth</td></tr><tr><td>Mulch refresh</td><td>Monthly in summer</td><td>2–3 inch pine straw or coco coir</td></tr><tr><td>Pest scouting</td><td>Twice weekly</td><td>Check leaf undersides for aphids, whiteflies</td></tr><tr><td>Succession sow</td><td>Every 2–3 weeks</td><td>Arugula, cilantro, spinach</td></tr><tr><td>Summer solarize</td><td>Jun–Aug</td><td>Clear plastic 4–6 weeks — kills nematodes</td></tr></table></div>
+    </div>
+    <div id="tab-care-pests" class="tab-panel">
+      <div class="table-scroll"><table class="schedule-table"><tr><th>Pest</th><th>Signs</th><th>Organic fix</th></tr><tr><td>Aphids</td><td>Sticky residue, curled leaves</td><td>Neem oil, ladybugs, water blast</td></tr><tr><td>Whiteflies</td><td>White cloud when disturbed</td><td>Yellow sticky traps, neem oil</td></tr><tr><td>Caterpillars</td><td>Large holes in leaves</td><td>BT spray — safe, organic, effective</td></tr><tr><td>Stink bugs</td><td>Dimpled fruit</td><td>Hand-pick, kaolin clay spray</td></tr><tr><td>Nematodes</td><td>Stunted plants, knotted roots</td><td>Marigold borders, soil solarization</td></tr><tr><td>Fungal</td><td>Spots, wilting, powder</td><td>Water AM only, copper fungicide</td></tr></table></div>
+    </div>
+    <div id="tab-care-pruning" class="tab-panel">
+      <div class="table-scroll"><table class="schedule-table"><tr><th>Plant</th><th>Technique</th><th>When</th></tr><tr><td>Basil</td><td>Pinch flower spikes. Cut stem above leaf node.</td><td>Weekly — extends harvest months</td></tr><tr><td>Tomatoes</td><td>Remove suckers. Prune lower leaves off soil.</td><td>Weekly — essential in FL humidity</td></tr><tr><td>Kale / spinach</td><td>Harvest outer leaves only, leave center.</td><td>Weekly cut-and-come-again</td></tr><tr><td>Cilantro / arugula</td><td>Cut 1 inch above soil. Pull when bolting.</td><td>Every 3 weeks, replant</td></tr><tr><td>Peppers</td><td>Light shaping. Hard prune late summer.</td><td>Aug–Sep for fall harvest</td></tr></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- THIS WEEK -->
+</div>
+
+<div class="page-view" id="page-track">
+  <section id="thisweek">
+  <div class="section-inner">
+    <div class="section-eyebrow">Mid-April · St. Pete Zone 10a</div>
+    <div class="section-title">What to do this week</div>
+    <div class="section-desc">Tap a task to mark done. Resets each Monday.</div>
+    <div class="week-grid" id="thisweek-grid"></div>
+  </div>
+</section>
+
+<!-- TRACKER -->
+  <section id="tracker">
+  <div class="section-inner">
+    <div class="section-eyebrow">Living record</div>
+    <div class="section-title">Plant health tracker</div>
+    <div class="section-desc">Rate each plant 1–5 stars and add notes. Saved automatically.</div>
+    <div class="tracker-grid" id="tracker-grid"></div>
+  </div>
+</section>
+
+<!-- LOG -->
+  <section id="log">
+  <div class="section-inner">
+    <div class="section-eyebrow">Garden journal</div>
+    <div class="section-title">Watering & harvest log</div>
+    <div class="section-desc">Log waterings, harvests, pest sightings, and notes. Saved locally.</div>
+    <div style="background:var(--cream);border:1px solid var(--fog);border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <div class="log-form-grid">
+        <div><div style="font-size:10px;color:var(--ink-pale);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em">Type</div><select class="log-select" id="log-type"><option value="water">Watering</option><option value="harvest">Harvest</option><option value="pest">Pest spotted</option><option value="note">Note</option></select></div>
+        <div><div style="font-size:10px;color:var(--ink-pale);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em">Plant / Bed</div><input class="log-input" id="log-plant" type="text" placeholder="e.g. Tomato · Bed D"></div>
+        <div><div style="font-size:10px;color:var(--ink-pale);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em">Notes</div><input class="log-input" id="log-note-text" type="text" placeholder="Optional detail"></div>
+        <div style="display:flex;align-items:flex-end"><button class="log-btn" onclick="addLogEntry()">Add entry</button></div>
+      </div>
+    </div>
+    <div style="background:var(--cream);border:1px solid var(--fog);border-radius:10px;padding:1rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">
+        <div style="font-size:12px;font-weight:500;color:var(--ink)">Log entries</div>
+        <button onclick="clearLog()" style="font-size:10px;color:var(--ink-pale);background:none;border:none;cursor:pointer">Clear all</button>
+      </div>
+      <div class="log-table-wrap"><table class="log-table"><thead><tr><th>Date</th><th>Type</th><th>Plant / Bed</th><th>Notes</th><th></th></tr></thead><tbody id="log-tbody"></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- GROW BAGS -->
+  <section id="growbags">
+  <div class="section-inner">
+    <div class="section-eyebrow">Container growing</div>
+    <div class="section-title">Fabric grow bags</div>
+    <div class="section-desc">Track your grow bags by gallon size. Each bag shows the right soil mix and fertilizer for its plant. Your custom bags are saved automatically.</div>
+    <div class="growbag-grid" id="growbag-grid"></div>
+  </div>
+</section>
+</div>
+
+
+
+<!-- GROW BAG MODAL -->
+<div class="gb-modal-backdrop hidden" id="gb-modal-backdrop">
+  <div class="gb-modal" id="gb-modal-inner"></div>
+</div>
+
+<div class="page-view" id="page-garden">
+
+<section style="padding:clamp(2rem,5vw,3.5rem) clamp(1rem,4vw,2rem)">
+  <div class="section-inner">
+    <div class="section-eyebrow">Saint Petersburg · Zone 10a</div>
+    <div class="section-title">My garden at a glance</div>
+
+    <!-- Quick stats row -->
+    <div class="stat-row" style="margin-bottom:2rem">
+      <div class="stat fade-in"><div class="val">4</div><div class="lbl">Raised beds</div></div>
+      <div class="stat fade-in"><div class="val">3</div><div class="lbl">Grow bags</div></div>
+      <div class="stat fade-in"><div class="val">1</div><div class="lbl">Trellis</div></div>
+      <div class="stat fade-in"><div class="val">10a</div><div class="lbl">USDA zone</div></div>
+      <div class="stat fade-in"><div class="val">Apr</div><div class="lbl">Current month</div></div>
+    </div>
+
+    <!-- 2-col grid: beds + containers -->
+    <div class="card-grid" style="margin-bottom:1.5rem">
+      <div class="info-card">
+        <h4>Raised beds</h4>
+        <ul>
+          <li><strong>Bed A</strong> — 40×58 in · east fence · herbs &amp; salad greens</li>
+          <li><strong>Bed B</strong> — 40×58 in · east fence · brassicas &amp; root veg</li>
+          <li><strong>Bed C</strong> — 41 in round · herb hub · year-round</li>
+          <li><strong>Bed D</strong> — E-shape · south yard · tomato/pepper powerhouse</li>
+        </ul>
+        <div style="margin-top:.6rem">
+          <button class="tab-btn active" style="font-size:11px;padding:5px 12px" onclick="switchPage('plan')">View bed layouts →</button>
+        </div>
+      </div>
+      <div class="info-card">
+        <h4>Grow bags &amp; containers</h4>
+        <ul>
+          <li><strong>Carrie Mango</strong> — 25 gal fabric bag · full sun</li>
+          <li><strong>Fairchild Mango</strong> — 25 gal fabric bag · full sun</li>
+          <li><strong>FL Best Peach</strong> — 30 gal fabric bag · full sun 8+ hrs</li>
+        </ul>
+        <div style="margin-top:.6rem">
+          <button class="tab-btn active" style="font-size:11px;padding:5px 12px" onclick="switchPage('track')">Manage grow bags →</button>
+        </div>
+      </div>
+      <div class="info-card">
+        <h4>Muscadine trellis</h4>
+        <ul>
+          <li>4 × 4×4×10 ft pressure-treated posts · 6 ft on center</li>
+          <li>3 wire levels at 2, 4, 6 ft · No. 9 galvanized</li>
+          <li>South fence behind Bed D</li>
+          <li>Varieties: Florida Fry + Carlos</li>
+        </ul>
+        <div style="margin-top:.6rem">
+          <button class="tab-btn active" style="font-size:11px;padding:5px 12px" onclick="switchPage('plan')">Full trellis guide →</button>
+        </div>
+      </div>
+      <div class="info-card">
+        <h4>This week</h4>
+        <p style="font-size:12px;color:var(--ink-light);margin-bottom:.5rem">Mid-April · St. Pete Zone 10a</p>
+        <ul>
+          <li>Harvest remaining cool-season greens before bolt</li>
+          <li>Plant basil now — perfect timing</li>
+          <li>Set up Bed D soil before May planting</li>
+          <li>Transplant banana stools — ideal window</li>
+          <li>Set up drip irrigation before summer</li>
+        </ul>
+        <div style="margin-top:.6rem">
+          <button class="tab-btn active" style="font-size:11px;padding:5px 12px" onclick="switchPage('track')">Full task list →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Season banner -->
+    <div style="background:var(--soil);border-radius:12px;padding:1.1rem 1.25rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center">
+      <div>
+        <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--leaf-light);margin-bottom:3px">Now — Spring transition</div>
+        <div style="font-size:14px;font-weight:500;color:var(--cream)">Cool season winding down · warm season beginning</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:3px">Harvest greens now · plant basil/tomatoes · prep Bed D · get drip irrigation in before June</div>
+      </div>
+      <button class="btn-primary" style="padding:8px 20px;background:var(--terracotta);color:#fff;border:none;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;margin-left:auto" onclick="switchPage('grow')">View planting calendar →</button>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>St. Pete Garden Planner · Zone 10a · Saint Petersburg, Florida</p>
+  <p style="margin-top:3px">Built with <span>♥</span> for year-round subtropical growing</p>
+</footer>
+
+<script>
+if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=Math.min(r,w/2,h/2);this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.arcTo(x+w,y,x+w,y+r,r);this.lineTo(x+w,y+h-r);this.arcTo(x+w,y+h,x+w-r,y+h,r);this.lineTo(x+r,y+h);this.arcTo(x,y+h,x,y+h-r,r);this.lineTo(x,y+r);this.arcTo(x,y,x+r,y,r);this.closePath();return this;};}
+
+/* ═══════════ SHARED PLANT DATABASE ═══════════ */
+const PLANTS = {
+  // key: { bg, label, sqft (plants per sq ft), note, companion, season }
+  kale:      {bg:'#27500A',label:'Kale',      sqft:1,  note:'Red Russian or Lacinato. Oct–Mar. Cut outer leaves weekly.'},
+  spinach:   {bg:'#3B6D11',label:'Spinach',   sqft:9,  note:'Bloomsdale or Space. Succession sow every 2 weeks Oct–Feb.'},
+  arugula:   {bg:'#639922',label:'Arugula',   sqft:4,  note:'Astro variety. 30-day harvest. Succession sow every 3 weeks.'},
+  carrot:    {bg:'#993C1D',label:'Carrot',    sqft:16, note:'Chantenay or Nantes. Direct sow. Thin to 9 per sq ft after sprouting.'},
+  onion:     {bg:'#D85A30',label:'Onion',     sqft:4,  note:'SHORT-DAY only — Texas Grano 1015 or Granex. Northern varieties will not bulb in FL.'},
+  garlic:    {bg:'#712B13',label:'Garlic',    sqft:4,  note:'Creole types only: Ajo Rojo, Rose du Var. Plant cloves Oct–Dec, harvest Apr–May.'},
+  parsley:   {bg:'#0F6E56',label:'Parsley',   sqft:4,  note:'Italian flat-leaf or curly. Year-round but best Oct–Apr.'},
+  basil:     {bg:'#085041',label:'Basil',     sqft:1,  note:'Plant beside every tomato. Repels aphids + whiteflies. Pinch flowers weekly.'},
+  cilantro:  {bg:'#1D9E75',label:'Cilantro',  sqft:9,  note:'Slo-Bolt variety essential in FL. Succession sow every 3 weeks Oct–Mar.'},
+  greenonion:{bg:'#5F5E5A',label:'Grn onion', sqft:16, note:'Evergreen White Bunching. Year-round. Direct sow densely, pull and resow.'},
+  marigold:  {bg:'#BA7517',label:'Marigold',  sqft:2,  note:'ESSENTIAL FL border plant. Suppresses nematodes, repels aphids + whitefly.'},
+  tomato:    {bg:'#A32D2D',label:'Tomato',    sqft:1,  note:'Heatmaster or Solar Fire (warm). Sweet 100 cherry for summer. Everglades for peak heat.'},
+  pepper:    {bg:'#534AB7',label:'Pepper',    sqft:1,  note:'Any variety. True year-round FL performer. Hard prune August for fall harvest.'},
+  cantaloupe:{bg:'#EF9F27',label:'Cantaloupe',sqft:1,  note:'Seminole (FL native) or Athena. Plant Feb–Mar only. Train vines up fence trellis.'},
+  nasturtium:{bg:'#D85A30',label:'Nasturtium',sqft:2,  note:'Aphid trap crop — colonize nasturtium over tomatoes. Flowers + leaves edible.'},
+  borage:    {bg:'#185FA5',label:'Borage',    sqft:1,  note:'Deters tomato hornworms. Attracts pollinators for cantaloupe fruit set.'},
+  calendula: {bg:'#854F0B',label:'Calendula', sqft:2,  note:'Repels whiteflies. Edible orange petals. Blooms through FL cool season.'},
+  cabbage:   {bg:'#173404',label:'Cabbage',   sqft:1,  note:'Early Jersey Wakefield or Stonehead. Oct–Jan. 1 per 2 sq ft for full head.'},
+  lettuce:   {bg:'#5a8a1a',label:'Lettuce',   sqft:4,  note:'Oak Leaf or Buttercrunch. Cool season only. Direct sow, cut-and-come-again.'},
+  radish:    {bg:'#cc2244',label:'Radish',    sqft:16, note:'Champion or Easter Egg. 25-day harvest. Great gap filler between slow crops.'},
+  chard:     {bg:'#1a6b3a',label:'Chard',     sqft:4,  note:'Rainbow Chard. More heat-tolerant than spinach. Good summer bridge crop.'},
+  beans:     {bg:'#4a7020',label:'Beans',     sqft:9,  note:'Bush Blue Lake. Warm season. Direct sow Mar–Apr. Nitrogen fixer for soil.'},
+  cucumber:  {bg:'#3d7a2a',label:'Cucumber',  sqft:2,  note:'Spacemaster or Marketmore. Warm season. Trellis vertically to save space.'},
+  // ── Tropical perennials & specialty ──
+  muscadine:    {bg:'#4a1a6b',label:'Muscadine',  sqft:1,  note:'Native FL grape. Needs trellis 10+ ft. Self-fertile varieties: Carlos, Florida Fry. Sandy well-drained soil, no calcium buildup.'},
+  longevitysp:  {bg:'#1a5c3a',label:'Longevity Sp.',sqft:1,note:'Perennial trailing vine. Part shade preferred, full sun ok. Year-round harvest in Zone 10a. Propagate by cuttings.'},
+  okinawasp:    {bg:'#2d3a1a',label:'Okinawa Sp.', sqft:1, note:'Bicolor purple/green. Heat-season champion. Full sun to part shade. Cut-and-come-again. Ornamental edible groundcover.'},
+  carriemango:  {bg:'#1a4a0a',label:'Carrie Mango',sqft:1, note:'Condo/dwarf mango. No fiber, rich flavor. 15–25 gal grow bag. Full sun. Well-drained sandy loam. Fruit Jun–Jul.'},
+  fairchildmango:{bg:'#2a5a0a',label:'Fairchild Mango',sqft:1,note:'Dwarf condo mango, yellowish-green skin. Fiberless, aromatic. 15–25 gal grow bag or large container. Full sun.'},
+  flbestpeach:  {bg:'#b85a2a',label:'FL Best Peach',sqft:1, note:'Low chill-hour FL peach. 25 gal grow bag minimum. Well-drained loamy soil pH 6.3–6.8. Full sun 8+ hrs. Fruit May.'},
+  zaatar:       {bg:'#5a7a1a',label:'Zaatar',      sqft:4,  note:'Mediterranean herb (Origanum syriacum). Full sun, excellent drainage, sandy/rocky soil. Very drought tolerant once established.'},
+  curryleaf:    {bg:'#2a6a1a',label:'Curry Leaf',  sqft:1,  note:'Murraya koenigii. Full sun 6-8 hrs. pH 6.4–6.9. NOTE: Cannot ship to FL — source locally. 5-gal container minimum.'},
+  banana:    {bg:'#2d5016',label:'Banana',    sqft:1,  note:'Mother plant. Space stools 8–10 ft apart. Fruit in 12–15 months Zone 10a.'},
+  bananapup: {bg:'#7fb23a',label:'Pup',       sqft:1,  note:'Keep 1–2 pups per stool max. Remove all others.'},
+  zone:      {bg:'#d5ccb8',label:'2ft zone',  sqft:0,  note:'Clearance buffer — banana root zone.'},
+  fence:     {bg:'#9c8c7c',label:'Fence',     sqft:0,  note:'6 ft south perimeter fence.'},
+};
+
+// Legacy aliases for backwards compat
+const PAL = PLANTS;
+
+/* ═══════════ PLANT METADATA FOR OPTIMIZER ═══════════ */
+const PLANT_META = {
+  // sun: 'full'=6+ hrs, 'part'=4-6 ok, 'any'=tolerant
+  // height: 'tall'=shades neighbors, 'medium', 'short'
+  // season: 'cool','warm','both'
+  // border: prefers perimeter placement
+  // companions: good neighbors (boost score)
+  // avoid: bad neighbors (penalty + alert)
+  // ── SOIL KEY: 'standard'=Mel\'s mix, 'sandy'=extra drainage, 'rich'=heavy compost, 'acidic'=pH<6.5, 'neutral'=pH 6-7
+  // ── FERT KEY: 'nitrogen'=leafy growth, 'balanced'=general, 'phosphorus'=roots/fruit, 'potassium'=fruit, 'organic'=compost only
+  kale:      {sun:'part', height:'medium', season:'cool', border:false, companions:['marigold','nasturtium','onion','garlic'],        avoid:[],
+              soil:'standard', soilNote:'Mel\'s mix (coir/compost/vermiculite). pH 6.0–7.0.',
+              fert:'nitrogen',  fertNote:'Fish emulsion every 2 weeks. Worm castings top-dress at planting.'},
+  spinach:   {sun:'part', height:'short',  season:'cool', border:false, companions:['cilantro','radish','strawberry'],                avoid:[]},
+  arugula:   {sun:'part', height:'short',  season:'cool', border:false, companions:['basil','marigold'],                             avoid:[]},
+  carrot:    {sun:'any',  height:'short',  season:'cool', border:false, companions:['onion','parsley','rosemary','lettuce'],          avoid:['beans']},
+  onion:     {sun:'any',  height:'short',  season:'cool', border:false, companions:['carrot','parsley','kale','cabbage','marigold'],  avoid:['beans']},
+  garlic:    {sun:'any',  height:'short',  season:'cool', border:false, companions:['tomato','kale','cabbage','marigold'],            avoid:['beans']},
+  parsley:   {sun:'part', height:'short',  season:'both', border:false, companions:['tomato','carrot','onion','asparagus'],          avoid:[]},
+  basil:     {sun:'full', height:'medium', season:'warm', border:false, companions:['tomato','pepper','marigold'],                   avoid:[]},
+  cilantro:  {sun:'part', height:'short',  season:'cool', border:false, companions:['spinach','basil'],                             avoid:[]},
+  greenonion:{sun:'any',  height:'short',  season:'both', border:false, companions:['carrot','lettuce','tomato'],                    avoid:[]},
+  marigold:  {sun:'full', height:'short',  season:'both', border:true,  companions:['tomato','pepper','kale','basil','cantaloupe'],  avoid:[]},
+  tomato:    {sun:'full', height:'tall',   season:'warm', border:false, companions:['basil','marigold','borage','parsley','garlic'], avoid:['cabbage','fennel']},
+  pepper:    {sun:'full', height:'medium', season:'warm', border:false, companions:['basil','marigold','carrot'],                    avoid:['fennel']},
+  cantaloupe:{sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','nasturtium','borage'],               avoid:['potato']},
+  nasturtium:{sun:'part', height:'short',  season:'both', border:true,  companions:['tomato','cucumber','kale','cantaloupe'],        avoid:[]},
+  borage:    {sun:'full', height:'medium', season:'warm', border:false, companions:['tomato','cantaloupe','strawberry'],             avoid:[]},
+  calendula: {sun:'part', height:'short',  season:'cool', border:true,  companions:['tomato','pepper','asparagus'],                  avoid:[]},
+  cabbage:   {sun:'any',  height:'medium', season:'cool', border:false, companions:['marigold','onion','garlic','nasturtium'],       avoid:['tomato','pepper']},
+  lettuce:   {sun:'part', height:'short',  season:'cool', border:false, companions:['carrot','radish','garlic'],                    avoid:[]},
+  radish:    {sun:'part', height:'short',  season:'cool', border:false, companions:['spinach','lettuce','carrot'],                  avoid:[]},
+  chard:     {sun:'full', height:'medium', season:'both', border:false, companions:['onion','garlic','beans'],                      avoid:[]},
+  beans:     {sun:'full', height:'tall',   season:'warm', border:false, companions:['carrot','cucumber','chard'],                   avoid:['onion','garlic','carrot']},
+  cucumber:  {sun:'full', height:'tall',   season:'warm', border:false, companions:['nasturtium','beans','marigold'],               avoid:['aromatic herbs']},
+};
+
+/* ═══════════ SOIL & FERTILIZER DATABASE ═══════════ */
+const SOIL_FERT = {
+  // Raised bed vegetables & herbs
+  kale:       {soil:'Standard Mel\'s mix (1/3 coir · 1/3 compost · 1/3 vermiculite) · pH 6.0–7.0',           fert:'Fish emulsion every 2 wks · worm castings top-dress · Osmocote at planting'},
+  spinach:    {soil:'Rich compost-heavy mix · pH 6.0–7.0 · keep consistently moist',                           fert:'Balanced 10-10-10 at planting · light fish emulsion every 3 wks'},
+  arugula:    {soil:'Standard Mel\'s mix · pH 6.0–7.0 · excellent drainage',                                   fert:'Minimal — light fish emulsion once a month. Over-feeding makes leaves bitter.'},
+  carrot:     {soil:'Deep loose mix, no rocks · 1/3 coir 1/3 fine compost 1/3 perlite · pH 6.0–6.8',          fert:'Low nitrogen — use phosphorus-rich at planting for root development. Avoid manure.'},
+  onion:      {soil:'Standard Mel\'s mix · pH 6.0–7.0 · well-drained',                                        fert:'Balanced granular at planting · stop feeding when bulbs form'},
+  garlic:     {soil:'Standard Mel\'s mix · pH 6.0–7.0 · excellent drainage',                                   fert:'Balanced at planting · stop when scapes appear in spring'},
+  parsley:    {soil:'Rich compost mix · pH 6.0–7.0 · steady moisture',                                         fert:'Balanced every 3–4 weeks · fish emulsion ok'},
+  basil:      {soil:'Standard Mel\'s mix · pH 6.0–7.0 · well-drained · warm soil essential',                   fert:'Balanced every 2 wks during growing season · avoid heavy nitrogen (reduces flavor)'},
+  cilantro:   {soil:'Standard Mel\'s mix · pH 6.2–6.8',                                                        fert:'Minimal — light balanced once at planting. Too much nitrogen causes early bolting.'},
+  greenonion: {soil:'Standard Mel\'s mix · pH 6.0–7.0',                                                        fert:'Light nitrogen — fish emulsion monthly'},
+  marigold:   {soil:'Any well-drained mix · pH 5.8–7.0 · tolerates poor soil',                                 fert:'Minimal. Too much fertilizer reduces flowers. Light balanced at planting only.'},
+  tomato:     {soil:'Standard Mel\'s mix + extra compost · pH 6.0–6.8 · consistent moisture critical',         fert:'Calcium/magnesium (Cal-Mag) monthly · balanced at planting · potassium-high when fruiting · CRITICAL: blossom end rot = calcium deficiency'},
+  pepper:     {soil:'Standard Mel\'s mix · pH 6.0–6.8 · warm well-drained',                                    fert:'Balanced at planting · phosphorus when flowering · reduce nitrogen once fruiting'},
+  cantaloupe: {soil:'Standard Mel\'s mix + 20% extra perlite for drainage · pH 6.0–6.8',                       fert:'Balanced at planting · high potassium when vines run · reduce nitrogen at fruit set'},
+  nasturtium: {soil:'Poor to average soil — thrives in low fertility · pH 6.0–7.0',                            fert:'Do NOT fertilize. Rich soil causes all foliage and no flowers.'},
+  borage:     {soil:'Average well-drained mix · pH 6.0–7.0 · tolerates dry conditions',                        fert:'Minimal. Light balanced once at planting.'},
+  calendula:  {soil:'Average Mel\'s mix · pH 5.5–7.0 · well-drained',                                          fert:'Light balanced at planting. Too much = fewer flowers.'},
+  cabbage:    {soil:'Rich compost-heavy mix · pH 6.5–7.0 · consistent moisture',                               fert:'Nitrogen-rich early growth · balanced as heads form · calcium important (prevents tip burn)'},
+  lettuce:    {soil:'Rich moist compost mix · pH 6.0–7.0 · mulch to keep roots cool',                          fert:'Light nitrogen (fish emulsion) every 2 wks · avoid heavy feeding'},
+  radish:     {soil:'Loose fine mix · pH 6.0–7.0 · no obstacles for root development',                         fert:'Minimal — phosphorus-rich at planting for root development only'},
+  chard:      {soil:'Rich compost mix · pH 6.0–7.0 · steady moisture',                                         fert:'Balanced every 3 wks · nitrogen for leaf growth'},
+  beans:      {soil:'Standard Mel\'s mix · pH 6.0–7.0 · well-drained · DO NOT over-amend nitrogen',           fert:'Inoculant at planting (nitrogen fixer) · phosphorus when flowering · no added nitrogen needed'},
+  cucumber:   {soil:'Rich warm well-drained mix · pH 6.0–7.0 · consistent moisture',                           fert:'Balanced at planting · potassium-high when fruiting · calcium prevents blossom end rot'},
+  // Tropical perennials — grow bags / large containers
+  muscadine:  {soil:'Sandy loam, excellent drainage · pH 5.5–6.5 · NO high calcium · amend with sulfur if pH too high',  fert:'10-10-10 balanced in Feb & June · potassium-rich at berry set · avoid excess nitrogen'},
+  longevitysp:{soil:'Rich moist well-draining mix · pH 6.0–7.0 · coir + compost + perlite works well',         fert:'Fish emulsion + seaweed kelp (1oz each per gallon) every 2 wks · nitrogen-forward for foliage'},
+  okinawasp:  {soil:'Average to rich mix · tolerates sandy soil with compost amendment · pH 6.0–7.0',          fert:'Compost top-dress in spring · organic nitrogen (fish emulsion) for foliage production'},
+  carriemango:{soil:'Grow bag: 40% premium compost · 20% pumice or coarse perlite · 40% forest floor mulch · excellent drainage · pH 4.5–7.0 · Start in 15 gal · repot to 25 gal for peak production', fert:'8-3-9 slow-release granular every 6–8 wks Mar–Sep · Cal-Mag monthly during fruiting · withhold completely Oct–Feb · foliar manganese spray if leaf tip burn appears'},
+  fairchildmango:{soil:'Grow bag: 40% premium compost · 20% pumice or coarse perlite · 40% forest floor mulch · pH 4.5–7.0 · 15 gal minimum · 20–25 gal optimal · ensure drainage hole at base', fert:'8-3-9 balanced slow-release every 6–8 wks Mar–Sep · high-potassium at flower/fruit set (Jun–Jul) · Cal-Mag monthly · stop all feeding Oct–Feb'},
+  flbestpeach:{soil:'Grow bag: 2 parts quality potting mix · 1 part coir · 1 part coarse perlite · pH 6.3–6.8 · 25 gal minimum · 30 gal optimal · add 2–3 in organic mulch on top', fert:'Balanced 10-10-10 Feb (bud break) · phosphorus-rich at first bloom · potassium boost May–Jun during fruit development · light balanced after harvest · STOP fertilizing Aug–Jan'},
+  zaatar:     {soil:'Sandy/rocky low-fertility mix · pH 7.0–8.0 · extremely well-drained · less is more',      fert:'Very minimal — light balanced once in spring. Lean soil intensifies flavor. No summer feeding.'},
+  curryleaf:  {soil:'Well-drained fertile mix · potting soil + perlite + bark · pH 6.4–6.9 · 5+ gal container',fert:'Balanced water-soluble every 4–6 wks spring/summer · STOP fall/winter · iron supplement if yellowing'},
+  banana:     {soil:'Rich moist well-draining mix · 30% compost · 20% perlite · 50% quality potting mix',      fert:'High-potassium fertilizer monthly · magnesium supplement (Epsom salt) quarterly · heavy feeder'},
+};
+
+/* Get soil+fert recommendation for a plant key */
+function getSoilFert(key) {
+  return SOIL_FERT[key] || {
+    soil:'Standard Mel\'s mix (1/3 coir · 1/3 compost · 1/3 vermiculite) · pH 6.0–7.0',
+    fert:'Balanced slow-release granular at planting · fish emulsion every 2 weeks during growing season'
+  };
+}
+
+/* Build soil+fert panel for a set of plant keys */
+function buildSoilFertPanel(plantKeys) {
+  const unique = [...new Set(plantKeys.filter(k => k && k !== 'empty' && SOIL_FERT[k]))];
+  if (!unique.length) return null;
+
+  // Group by soil type similarity — find the most common needs
+  const soilNeeds = unique.map(k => ({ key: k, ...getSoilFert(k) }));
+
+  const panel = document.createElement('div');
+  panel.className = 'soil-fert-panel';
+
+  const title = document.createElement('div');
+  title.className = 'sf-title';
+  title.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Soil & fertilizer for this bed';
+  panel.appendChild(title);
+
+  soilNeeds.forEach(item => {
+    const p = PLANTS[item.key]; if (!p) return;
+    const row = document.createElement('div');
+    row.className = 'sf-row';
+    row.innerHTML = `
+      <div class="sf-swatch" style="background:${p.bg}"></div>
+      <div class="sf-body">
+        <div class="sf-plant">${p.label}</div>
+        <div class="sf-soil"><span class="sf-tag sf-soil-tag">🌱 Soil</span>${item.soil}</div>
+        <div class="sf-soil"><span class="sf-tag sf-fert-tag">🌿 Feed</span>${item.fert}</div>
+      </div>`;
+    panel.appendChild(row);
+  });
+  return panel;
+}
+
+/* ═══════════ OPTIMIZER ENGINE ═══════════ */
+const OPTIMIZER = {
+  // Score a single cell based on neighbors
+  scoreCell(layout, cols, idx, key, bedSun) {
+    if (!key || key === 'empty' || key === '_erase') return 0;
+    const meta = PLANT_META[key];
+    if (!meta) return 0;
+    let score = 0;
+    const row = Math.floor(idx / cols);
+    const col = idx % cols;
+    const totalRows = Math.ceil(layout.length / cols);
+    const neighbors = [];
+    if (col > 0)           neighbors.push(layout[idx-1]);
+    if (col < cols-1)      neighbors.push(layout[idx+1]);
+    if (row > 0)           neighbors.push(layout[idx-cols]);
+    if (row < totalRows-1) neighbors.push(layout[idx+cols]);
+    // Companion bonus
+    neighbors.forEach(n => {
+      if (!n || n==='empty') return;
+      if (meta.companions.includes(n)) score += 3;
+      if (meta.avoid.includes(n)) score -= 5;
+    });
+    // Border bonus for border plants
+    if (meta.border && (col===0 || col===cols-1 || row===0 || row===totalRows-1)) score += 2;
+    // Sun alignment with bed
+    if (bedSun === 'full' && meta.sun === 'full') score += 1;
+    if (bedSun === 'part' && meta.sun === 'part') score += 1;
+    // Height: tall plants in back row (row 0 = north/fence side) get bonus
+    if (meta.height === 'tall' && row === 0) score += 2;
+    // Height: tall plant in front (last row) shades everything — penalty
+    if (meta.height === 'tall' && row === totalRows-1) score -= 3;
+    return score;
+  },
+
+  // Generate alerts for current layout
+  generateAlerts(layout, cols, bedSun, bedId) {
+    const alerts = [];
+    const totalRows = Math.ceil(layout.length / cols);
+    layout.forEach((key, idx) => {
+      if (!key || key==='empty' || key==='_erase') return;
+      const meta = PLANT_META[key];
+      if (!meta) return;
+      const row = Math.floor(idx / cols);
+      const col = idx % cols;
+      const p = PLANTS[key];
+      // Check neighbors
+      const neighborIdxs = [];
+      if (col > 0) neighborIdxs.push(idx-1);
+      if (col < cols-1) neighborIdxs.push(idx+1);
+      if (row > 0) neighborIdxs.push(idx-cols);
+      if (row < totalRows-1) neighborIdxs.push(idx+cols);
+      neighborIdxs.forEach(ni => {
+        const nk = layout[ni];
+        if (!nk || nk==='empty') return;
+        const nm = PLANT_META[nk];
+        const np = PLANTS[nk];
+        if (!nm || !np) return;
+        // Bad companion
+        if (meta.avoid.includes(nk)) {
+          // Suggest swapping one of them with parsley (neutral separator) if available,
+          // otherwise just flag which cell to move
+          alerts.push({
+            type: 'bad_companion', severity: 'error',
+            cell: idx, neighborCell: ni,
+            plantA: key, plantB: nk,
+            msg: `<strong>${p.label}</strong> and <strong>${np.label}</strong> are bad companions — they inhibit each other's growth.`,
+            fix: `Separate them with a neutral plant (parsley works well) or move one to a different section.`,
+            fixAction: 'separate', // swap cell with parsley if parsley exists in layout, else swap the two apart
+            color: p.bg,
+          });
+        }
+        // Sun mismatch: shade-lover next to tall full-sun plant
+        if (nm.height === 'tall' && meta.sun === 'part' && ni < idx) {
+          alerts.push({
+            type: 'shade_conflict', severity: 'warning',
+            cell: idx, neighborCell: ni,
+            plantA: key, plantB: nk,
+            msg: `<strong>${np.label}</strong> is tall and will shade <strong>${p.label}</strong>, which needs more direct sun.`,
+            fix: `Move ${np.label} to the back (north) row so it doesn't block sun from shorter plants.`,
+            fixAction: 'move_tall_to_back', // move neighborCell plant to back row
+            fixCell: ni,
+            color: '#e8a020',
+          });
+        }
+        // Tall plant not in north row
+        if (meta.height === 'tall' && row > 0 && row === totalRows-1) {
+          alerts.push({
+            type: 'height_conflict', severity: 'warning',
+            cell: idx,
+            plantA: key,
+            msg: `<strong>${p.label}</strong> is tall and in the front row — it will shade the whole bed behind it.`,
+            fix: `Move ${p.label} to the back row (closest to fence/north side).`,
+            fixAction: 'move_to_back_row',
+            fixCell: idx,
+            color: p.bg,
+          });
+        }
+        // Season mismatch — info only, skip per user preference
+      });
+      // Border placement — info only, skip per user preference
+    });
+    // Deduplicate
+    const seen = new Set();
+    return alerts.filter(a => {
+      const k = `${a.type}-${Math.min(a.cell,a.neighborCell||a.cell)}-${Math.max(a.cell,a.neighborCell||a.cell)}`;
+      if (seen.has(k)) return false;
+      seen.add(k); return true;
+    });
+  },
+
+  // Optimize layout: returns a new array
+  optimize(layout, cols, voidSet, bedSun) {
+    const totalRows = Math.ceil(layout.length / cols);
+    // Separate void cells from plantable cells
+    const plantable = []; // {idx, key}
+    const keys = [];
+    layout.forEach((key, idx) => {
+      if (!voidSet || !voidSet.has(idx)) {
+        plantable.push(idx);
+        if (key && key !== 'empty' && key !== '_erase') keys.push(key);
+      }
+    });
+    if (keys.length === 0) return layout;
+
+    // Classify cells into zones
+    const backRow = plantable.filter(idx => Math.floor(idx/cols) === 0);
+    const frontRow = plantable.filter(idx => Math.floor(idx/cols) === totalRows-1);
+    const leftCol  = plantable.filter(idx => idx%cols === 0 && Math.floor(idx/cols) > 0 && Math.floor(idx/cols) < totalRows-1);
+    const rightCol = plantable.filter(idx => idx%cols === cols-1 && Math.floor(idx/cols) > 0 && Math.floor(idx/cols) < totalRows-1);
+    const interior = plantable.filter(idx => !backRow.includes(idx) && !frontRow.includes(idx) && !leftCol.includes(idx) && !rightCol.includes(idx));
+    const border = [...backRow, ...frontRow, ...leftCol, ...rightCol];
+
+    // Categorize available plants
+    const tallPlants    = keys.filter(k => PLANT_META[k]?.height === 'tall');
+    const borderPlants  = keys.filter(k => PLANT_META[k]?.border && !tallPlants.includes(k));
+    const shortPlants   = keys.filter(k => PLANT_META[k]?.height === 'short' && !borderPlants.includes(k) && !tallPlants.includes(k));
+    const mediumPlants  = keys.filter(k => !tallPlants.includes(k) && !borderPlants.includes(k) && !shortPlants.includes(k));
+
+    // Build assignment: tall→back row, border plants→perimeter, rest→interior
+    const newLayout = [...layout];
+    const assigned = new Set();
+    const usedKeys = [...keys];
+
+    function place(cellIdx, key) {
+      newLayout[cellIdx] = key;
+      assigned.add(cellIdx);
+      const ki = usedKeys.indexOf(key);
+      if (ki > -1) usedKeys.splice(ki, 1);
+    }
+
+    // 1. Tall plants to back row
+    backRow.forEach((cellIdx, i) => {
+      if (i < tallPlants.length) place(cellIdx, tallPlants[i]);
+    });
+    // 2. Border companion plants to perimeter
+    const remainingBorder = border.filter(idx => !assigned.has(idx));
+    remainingBorder.forEach((cellIdx, i) => {
+      if (i < borderPlants.length) place(cellIdx, borderPlants[i]);
+      else if (i < borderPlants.length + shortPlants.length) place(cellIdx, shortPlants[i - borderPlants.length]);
+    });
+    // 3. Fill interior with remaining (try to companion-pair)
+    const remaining = [...usedKeys];
+    const unassigned = plantable.filter(idx => !assigned.has(idx));
+    // Group companions together: sort remaining by companion affinity
+    unassigned.forEach((cellIdx, i) => {
+      if (remaining.length === 0) { newLayout[cellIdx] = 'empty'; return; }
+      // Pick plant that has best companion score with already-placed neighbors
+      let bestKey = remaining[0], bestScore = -99;
+      remaining.forEach(k => {
+        const s = OPTIMIZER.scoreCell(newLayout, cols, cellIdx, k, bedSun);
+        if (s > bestScore) { bestScore = s; bestKey = k; }
+      });
+      place(cellIdx, bestKey);
+    });
+
+    return newLayout;
+  }
+};
+
+const COMPANION = {
+  kale:'Loves: nasturtium trap crop, marigold border.',
+  spinach:'Loves: cilantro, chamomile. Avoid: fennel.',
+  arugula:'Loves: basil, marigold. Fast 30-day harvest.',
+  carrot:'Loves: onion, parsley. Onion masks carrot fly scent.',
+  onion:'Loves: carrot, parsley. Repels soft-bodied insects.',
+  garlic:'Loves: kale, cabbage. Passive fungicide in humid FL.',
+  parsley:'Loves: tomato, carrot. Attracts predatory wasps.',
+  basil:'Plant beside every tomato. Repels aphids + whiteflies.',
+  cilantro:'Slo-Bolt variety. Succession sow every 3 weeks.',
+  greenonion:'Year-round. Repels aphids + slugs from neighbors.',
+  marigold:'ESSENTIAL — suppresses nematodes, repels aphids.',
+  tomato:'Heatmaster / Solar Fire / Sweet 100 / Everglades.',
+  pepper:'Any variety. Year-round FL performer.',
+  cantaloupe:'Center arm Bed D. Train vines to south fence trellis.',
+  nasturtium:'Trap crop — aphids choose it over tomatoes.',
+  borage:'Deters hornworms, attracts pollinators.',
+  calendula:'Repels whiteflies. Edible petals.',
+  cabbage:'Loves: marigold, garlic, onion.',
+  lettuce:'Cool season only. Bolts above 80°F.',
+  radish:'Great gap filler. 25-day harvest.',
+  chard:'More heat-tolerant than spinach.',
+  beans:'Nitrogen fixer — improves soil.',
+  cucumber:'Train up trellis to save space.',
+  banana:'Mother plant. 8–10 ft between stools.',
+  bananapup:'Keep max 2 pups per stool.',
+  zone:'2 ft clearance buffer.',
+  fence:'6 ft south fence.',
+};
+
+const PX={
+  kale:      [[0,1,0,0,0,1,0,0],[0,1,1,0,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,1,1,1,0,0,0],[0,1,1,0,1,1,0,0],[0,0,1,0,1,0,0,0],[0,0,0,1,0,0,0,0]],
+  spinach:   [[0,0,1,1,1,0,0,0],[0,1,1,0,1,1,0,0],[1,1,0,0,0,1,1,0],[0,1,1,0,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0]],
+  arugula:   [[0,1,1,0,1,1,0,0],[1,1,0,0,0,1,1,0],[0,1,1,0,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0]],
+  carrot:    [[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0]],
+  onion:     [[0,0,0,1,0,0,0,0],[0,0,1,0,1,0,0,0],[0,0,1,0,1,0,0,0],[0,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0]],
+  garlic:    [[0,0,0,1,0,0,0,0],[0,0,1,1,1,0,0,0],[0,0,1,0,1,0,0,0],[0,1,1,1,1,1,0,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0]],
+  parsley:   [[0,1,0,1,0,1,0,0],[1,1,1,1,1,1,0,0],[0,1,1,1,1,0,0,0],[0,0,1,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,1,1,0,0,0,0],[0,0,1,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  basil:     [[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  cilantro:  [[1,0,1,0,1,0,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  greenonion:[[0,0,1,0,1,0,0,0],[0,0,1,0,1,0,0,0],[0,0,1,0,1,0,0,0],[0,0,1,0,1,0,0,0],[0,1,1,1,1,1,0,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,0,0,0,0,0]],
+  marigold:  [[0,1,0,1,0,1,0,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  tomato:    [[0,1,1,0,1,1,0,0],[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,0,0,0,0,0]],
+  pepper:    [[0,0,0,1,0,0,0,0],[0,0,1,1,1,0,0,0],[0,0,1,0,1,0,0,0],[0,1,1,0,1,1,0,0],[0,1,1,0,1,1,0,0],[0,0,1,0,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  cantaloupe:[[0,1,1,1,1,1,1,0],[1,1,1,0,0,1,1,1],[1,1,0,0,0,0,1,1],[1,1,0,0,0,0,1,1],[1,1,0,0,0,0,1,1],[1,1,1,0,0,1,1,1],[0,1,1,1,1,1,1,0],[0,0,0,0,0,0,0,0]],
+  nasturtium:[[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  borage:    [[0,1,0,0,0,1,0,0],[1,1,1,0,1,1,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[1,1,0,0,0,1,1,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  calendula: [[0,1,0,1,0,1,0,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  cabbage:   [[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,0,0,0,0,0]],
+  lettuce:   [[0,1,1,1,1,1,0,0],[1,1,0,1,0,1,1,0],[1,0,1,1,1,0,1,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  radish:    [[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[0,1,1,1,1,1,0,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  chard:     [[0,1,0,1,0,1,0,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  beans:     [[0,0,1,1,1,0,0,0],[0,1,0,1,0,1,0,0],[1,0,1,1,1,0,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  cucumber:  [[0,0,1,1,1,0,0,0],[0,1,1,0,1,1,0,0],[1,1,0,0,0,1,1,0],[0,1,1,0,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+  banana:    [[0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[1,1,1,0,0,1,1,1],[1,1,1,0,0,1,1,1],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
+  bananapup: [[0,0,0,1,0,0,0,0],[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[0,1,1,0,1,1,0,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
+};
+
+/* ═══════════ GLOBAL STATE ═══════════ */
+let selectedPlant = null; // currently selected palette plant key
+let editMode = {}; // bedId -> boolean
+let bedLayouts = {}; // bedId -> array of plant keys (persisted)
+
+const LAYOUT_STORAGE = 'garden_layouts_v2';
+function loadLayouts() { return JSON.parse(localStorage.getItem(LAYOUT_STORAGE)||'{}'); }
+function saveLayouts() { localStorage.setItem(LAYOUT_STORAGE, JSON.stringify(bedLayouts)); }
+
+const tip = document.getElementById('global-tip');
+function showTip(e, key) {
+  if (!key || key === '_void') { tip.style.display='none'; return; }
+  const p = PLANTS[key];
+  if (!p) { tip.style.display='none'; return; }
+  const sqftText = p.sqft > 0 ? `<span style="display:inline-block;margin-top:3px;font-size:10px;background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px">${p.sqft} per sq ft</span>` : '';
+  tip.innerHTML = `<strong>${p.label}</strong>${sqftText}<br>${COMPANION[key]||p.note||''}`;
+  tip.style.display = 'block';
+  tip.style.left = (e.clientX+14)+'px';
+  tip.style.top  = (e.clientY-8)+'px';
+  if (e.clientX+215 > window.innerWidth) tip.style.left = (e.clientX-210)+'px';
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.gcell') && !e.target.closest('.ptile') && !e.target.closest('.edit-toggle-btn')) {
+    tip.style.display='none';
+  }
+});
+
+/* ═══════════ PIXEL CANVAS ═══════════ */
+function makePixelCanvas(key, size) {
+  size = size || 32;
+  const cv = document.createElement('canvas');
+  cv.width = 8; cv.height = 8;
+  cv.style.width = size+'px'; cv.style.height = size+'px';
+  cv.style.imageRendering = 'pixelated';
+  const ctx = cv.getContext('2d');
+  const grid = PX[key];
+  if (grid) grid.forEach((row,r) => row.forEach((v,c) => {
+    if (v) { ctx.fillStyle='rgba(255,255,255,.85)'; ctx.fillRect(c,r,1,1); }
+  }));
+  return cv;
+}
+
+/* ═══════════ CELL BUILDER ═══════════ */
+function makeCell(key, isVoid, bedId, cellIdx) {
+  const d = document.createElement('div');
+  d.className = 'gcell';
+  if (isVoid || !key || key === 'empty' || key === '_erase') {
+    d.classList.add('gcell-void');
+    if (key === '_erase' || key === 'empty') {
+      d.style.cursor = 'pointer';
+      const x = document.createElement('div');
+      x.style.cssText = 'font-size:18px;color:#c4612a;opacity:.5;line-height:1';
+      x.textContent = '+';
+      d.appendChild(x);
+    }
+    if (!isVoid) {
+      d.addEventListener('click', e => {
+        if (editMode[bedId] && selectedPlant && selectedPlant !== '_erase') swapTile(bedId, cellIdx, selectedPlant);
+      });
+    }
+    return d;
+  }
+  const p = PLANTS[key] || { bg:'#888', label:key, sqft:1, note:'' };
+  d.style.background = p.bg;
+  d.appendChild(makePixelCanvas(key));
+  const lbl = document.createElement('div');
+  lbl.className = 'gcell-lbl'; lbl.textContent = p.label;
+  d.appendChild(lbl);
+  // sq ft count badge
+  if (p.sqft > 1) {
+    const cnt = document.createElement('div');
+    cnt.className = 'gcell-count'; cnt.textContent = 'x'+p.sqft;
+    d.appendChild(cnt);
+  }
+  // hover tooltip
+  d.addEventListener('mousemove', e => showTip(e, key));
+  d.addEventListener('mouseleave', () => tip.style.display='none');
+  // tap for mobile tooltip + tile swap
+  if (editMode[bedId]) d.classList.add('edit-mode');
+  d.addEventListener('click', e => {
+    if (editMode[bedId] && selectedPlant) {
+      swapTile(bedId, cellIdx, selectedPlant);
+    } else {
+      showTip(e, key);
+      setTimeout(() => tip.style.display='none', 2500);
+    }
+  });
+  return d;
+}
+
+/* ═══════════ TILE SWAP ═══════════ */
+function swapTile(bedId, cellIdx, plantKey) {
+  if (!bedLayouts[bedId]) return;
+  bedLayouts[bedId][cellIdx] = (plantKey === '_erase') ? 'empty' : plantKey;
+  saveLayouts();
+  renderBed(bedId);
+}
+
+/* ═══════════ PALETTE ═══════════ */
+const PALETTE_GROUPS = [
+  { label: 'Vegetables', keys: ['tomato','pepper','cantaloupe','cabbage','carrot','onion','garlic','lettuce','radish','chard','beans','cucumber'] },
+  { label: 'Herbs',      keys: ['basil','cilantro','parsley','greenonion'] },
+  { label: 'Flowers & companions', keys: ['marigold','nasturtium','borage','calendula'] },
+  { label: 'Greens',     keys: ['kale','spinach','arugula'] },
+];
+
+function buildPalette(bedId, containerEl, toolbarEl) {
+  // Toolbar button
+  toolbarEl.innerHTML = '';
+  const btn = document.createElement('button');
+  btn.className = 'edit-toggle-btn' + (editMode[bedId] ? ' active' : '');
+  btn.innerHTML = `<span class="dot"></span>${editMode[bedId] ? 'Done editing' : 'Edit tiles'}`;
+  btn.addEventListener('click', () => {
+    editMode[bedId] = !editMode[bedId];
+    selectedPlant = null;
+    buildPalette(bedId, containerEl, toolbarEl);
+    // Toggle edit-mode class on all non-void cells
+    const wrap = document.getElementById('bed-grid-'+bedId);
+    if (wrap) wrap.querySelectorAll('.gcell').forEach(c => {
+      if (!c.classList.contains('gcell-void')) c.classList.toggle('edit-mode', editMode[bedId]);
+    });
+    containerEl.classList.toggle('visible', editMode[bedId]);
+  });
+  toolbarEl.appendChild(btn);
+  // Optimize button
+  const optBtn = document.createElement('button');
+  optBtn.className = 'opt-btn'; optBtn.id = 'opt-btn-'+bedId;
+  optBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 1L8 4.5L12 5L9 7.8L9.8 12L6.5 10.2L3.2 12L4 7.8L1 5L5 4.5L6.5 1Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Optimize bed`;
+  optBtn.addEventListener('click', () => runOptimize(bedId));
+  toolbarEl.appendChild(optBtn);
+  // Alert badge (shown when alerts exist)
+  const alertCountEl = document.createElement('span');
+  alertCountEl.id = 'alert-count-'+bedId;
+  alertCountEl.style.cssText = 'font-size:10px;color:var(--terracotta);cursor:pointer;';
+  alertCountEl.addEventListener('click', () => {
+    const ap = document.getElementById('alerts-'+bedId);
+    if (ap) { ap.classList.toggle('visible'); ap.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  });
+  toolbarEl.appendChild(alertCountEl);
+  if (editMode[bedId] && selectedPlant) {
+    const ind = document.createElement('div');
+    ind.className = 'selected-indicator';
+    const p = PLANTS[selectedPlant];
+    ind.innerHTML = `<div class="selected-swatch" style="background:${p.bg}"></div><span>Selected: ${p.label} (${p.sqft}/sq ft) — tap a cell</span>`;
+    toolbarEl.appendChild(ind);
+    const undo = document.createElement('button');
+    undo.className = 'edit-undo-btn';
+    undo.textContent = 'Reset layout';
+    undo.addEventListener('click', () => {
+      if (confirm('Reset this bed to the default layout?')) {
+        delete bedLayouts[bedId];
+        saveLayouts();
+        renderBed(bedId);
+        editMode[bedId] = false;
+        selectedPlant = null;
+        buildPalette(bedId, containerEl, toolbarEl);
+      }
+    });
+    toolbarEl.appendChild(undo);
+  }
+
+  if (!editMode[bedId]) { containerEl.classList.remove('visible'); return; }
+  containerEl.innerHTML = '';
+  const title = document.createElement('div'); title.className='palette-title'; title.textContent='Choose a plant to place:';
+  containerEl.appendChild(title);
+  const groups = document.createElement('div'); groups.className='palette-groups';
+
+  // Erase tile
+  const eraseRow = document.createElement('div'); eraseRow.style.marginBottom='.25rem';
+  const eraseTile = document.createElement('div');
+  eraseTile.className = 'ptile erase-tile' + (selectedPlant==='_erase'?' selected':'');
+  eraseTile.style.width='44px'; eraseTile.style.height='44px';
+  eraseTile.style.borderRadius='5px'; eraseTile.style.display='flex';
+  eraseTile.style.alignItems='center'; eraseTile.style.justifyContent='center';
+  eraseTile.style.cursor='pointer'; eraseTile.style.border='2px solid '+(selectedPlant==='_erase'?'var(--sun)':'transparent');
+  eraseTile.innerHTML='<div style="font-size:18px;color:var(--ink-pale)">✕</div>';
+  eraseTile.title='Erase tile';
+  eraseTile.addEventListener('click', () => { selectedPlant = '_erase'; buildPalette(bedId,containerEl,toolbarEl); });
+  eraseRow.appendChild(eraseTile);
+  groups.appendChild(eraseRow);
+
+  PALETTE_GROUPS.forEach(group => {
+    const glbl = document.createElement('div'); glbl.className='palette-group-label'; glbl.textContent=group.label;
+    groups.appendChild(glbl);
+    const row = document.createElement('div'); row.className='palette-row';
+    group.keys.forEach(k => {
+      const p = PLANTS[k]; if (!p) return;
+      const tile = document.createElement('div');
+      tile.className = 'ptile' + (selectedPlant===k?' selected':'');
+      tile.style.background = p.bg;
+      tile.appendChild(makePixelCanvas(k, 26));
+      const lbl = document.createElement('div'); lbl.className='ptile-lbl'; lbl.textContent=p.label;
+      tile.appendChild(lbl);
+      if (p.sqft > 1) {
+        const cnt = document.createElement('div'); cnt.className='ptile-count'; cnt.textContent='x'+p.sqft;
+        tile.appendChild(cnt);
+      }
+      tile.addEventListener('click', () => { selectedPlant=k; buildPalette(bedId,containerEl,toolbarEl); });
+      tile.addEventListener('mousemove', e => showTip(e, k));
+      tile.addEventListener('mouseleave', () => tip.style.display='none');
+      row.appendChild(tile);
+    });
+    groups.appendChild(row);
+  });
+  const hint = document.createElement('div'); hint.className='palette-hint';
+  hint.textContent = 'Select a plant above, then tap any cell to place it. Tap the badge (x16 etc) to see how many fit per square foot.';
+  groups.appendChild(hint);
+  containerEl.appendChild(groups);
+}
+
+/* ═══════════ GRID RENDERER ═══════════ */
+function makeGrid(layout, cols, voidSet, bedId) {
+  const wrap = document.createElement('div');
+  wrap.id = 'bed-grid-' + bedId;
+  const rows = Math.ceil(layout.length / cols);
+  for (let r = 0; r < rows; r++) {
+    const row = document.createElement('div'); row.className='grid-row';
+    for (let c = 0; c < cols; c++) {
+      const i = r * cols + c;
+      const isVoid = voidSet && voidSet.has(i);
+      const key = isVoid ? null : (layout[i] || 'empty');
+      const cell = makeCell(key, isVoid, bedId, i);
+      if (editMode[bedId] && !isVoid) cell.classList.add('edit-mode');
+      row.appendChild(cell);
+    }
+    wrap.appendChild(row);
+  }
+  return wrap;
+}
+
+function makeLegend(layout, voidSet) {
+  const seen = new Set(); const div = document.createElement('div'); div.className='legend';
+  layout.forEach((k,i) => {
+    if (!k||k==='empty'||seen.has(k)||(voidSet&&voidSet.has(i))) return;
+    seen.add(k); const p = PLANTS[k]; if (!p) return;
+    const item = document.createElement('div'); item.className='leg-item';
+    item.innerHTML=`<div class="leg-dot" style="background:${p.bg}"></div>${p.label}`;
+    div.appendChild(item);
+  });
+  return div;
+}
+
+function makeCountGrid(layout, voidSet) {
+  const counts={};
+  layout.forEach((k,i) => { if(k&&k!=='empty'&&!(voidSet&&voidSet.has(i))) counts[k]=(counts[k]||0)+1; });
+  const div = document.createElement('div'); div.className='count-row';
+  Object.entries(counts).sort((a,b)=>b[1]-a[1]).forEach(([k,n]) => {
+    const p = PLANTS[k]; if(!p) return;
+    const total = p.sqft > 0 ? n * p.sqft : n;
+    const label = p.sqft > 1 ? `${n} cells = ${total} seeds` : `${n} plant${n>1?'s':''}`;
+    const d = document.createElement('div'); d.className='count-cell';
+    d.innerHTML=`<span>${p.label}</span><span>${label}</span>`;
+    div.appendChild(d);
+  });
+  return div;
+}
+
+function makeStagger(items) {
+  const box=document.createElement('div'); box.className='stagger-box';
+  box.innerHTML='<div class="stagger-title">Succession schedule</div>';
+  items.forEach(({week,color,note}) => {
+    const row=document.createElement('div'); row.className='stagger-row';
+    row.innerHTML=`<span class="stagger-wk">${week}</span><div class="stagger-bar" style="background:${color};width:${Math.min(100,35+note.length*1.1)}%"></div><span class="stagger-note">${note}</span>`;
+    box.appendChild(row);
+  });
+  return box;
+}
+
+
+/* ═══════════ OPTIMIZE + ALERT FUNCTIONS ═══════════ */
+function getBedSun(bedId) {
+  return bedId === 'bedD' ? 'full' : 'part';
+}
+
+function applyAlertFix(bedId, alert) {
+  const def = BEDS_DEF.find(b => b.id === bedId);
+  if (!def) return;
+  const layout = [...(bedLayouts[bedId] || def.defaultLayout)];
+  const cols = def.cols;
+  const totalRows = Math.ceil(layout.length / cols);
+
+  if (alert.fixAction === 'separate') {
+    // Swap one of the bad companions with parsley if it exists in the layout,
+    // otherwise swap the two cells with each other (at least they're no longer adjacent)
+    const parsleyIdx = layout.indexOf('parsley');
+    if (parsleyIdx > -1 && parsleyIdx !== alert.cell && parsleyIdx !== alert.neighborCell) {
+      // Swap alert.cell with the parsley cell
+      const tmp = layout[alert.cell];
+      layout[alert.cell] = layout[parsleyIdx];
+      layout[parsleyIdx] = tmp;
+    } else {
+      // Just swap the two bad companions apart — they end up in each other's spots
+      // which keeps them in the bed but at least separates the pairing visually
+      const tmp = layout[alert.cell];
+      layout[alert.cell] = layout[alert.neighborCell];
+      layout[alert.neighborCell] = tmp;
+    }
+  } else if (alert.fixAction === 'move_tall_to_back' || alert.fixAction === 'move_to_back_row') {
+    // Find first back-row cell (row 0) that has a short plant we can swap with
+    const targetCell = alert.fixCell !== undefined ? alert.fixCell : alert.cell;
+    const backRowCells = [];
+    for (let c = 0; c < cols; c++) {
+      const cellKey = layout[c];
+      const cellMeta = PLANT_META[cellKey];
+      if (cellMeta && cellMeta.height === 'short') backRowCells.push(c);
+    }
+    if (backRowCells.length > 0) {
+      const swapWith = backRowCells[0];
+      const tmp = layout[targetCell];
+      layout[targetCell] = layout[swapWith];
+      layout[swapWith] = tmp;
+    } else {
+      // No short plant in back — just move to first back row cell
+      const tmp = layout[targetCell];
+      layout[targetCell] = layout[0];
+      layout[0] = tmp;
+    }
+  }
+
+  bedLayouts[bedId] = layout;
+  saveLayouts();
+  renderBed(bedId);
+  setTimeout(() => runAlerts(bedId), 80);
+}
+
+function runAlerts(bedId) {
+  const def = BEDS_DEF.find(b => b.id === bedId);
+  if (!def) return;
+  const layout = bedLayouts[bedId] || def.defaultLayout;
+  const allAlerts = OPTIMIZER.generateAlerts(layout, def.cols, getBedSun(bedId), bedId);
+
+  // Only keep serious: error + warning. Deduplicate by msg.
+  const unique = []; const msgs = new Set();
+  allAlerts
+    .filter(a => a.severity === 'error' || a.severity === 'warning')
+    .forEach(a => { if (!msgs.has(a.msg)) { msgs.add(a.msg); unique.push(a); } });
+
+  // Update count badge
+  const countEl = document.getElementById('alert-count-'+bedId);
+  if (countEl) {
+    if (unique.length === 0) {
+      countEl.innerHTML = '<span class="alert-badge badge-ok">✓ Good layout</span>';
+      return;
+    }
+    const errors   = unique.filter(a => a.severity==='error').length;
+    const warnings = unique.filter(a => a.severity==='warning').length;
+    let txt = '';
+    if (errors)   txt += `<span class="alert-badge badge-error">⚠ ${errors} issue${errors>1?'s':''}</span>`;
+    if (warnings) txt += `<span class="alert-badge badge-warning">◆ ${warnings} warning${warnings>1?'s':''}</span>`;
+    countEl.innerHTML = txt;
+  }
+
+  // Render alert panel
+  const panel = document.getElementById('alerts-'+bedId);
+  if (!panel) return;
+  panel.innerHTML = '';
+  if (unique.length === 0) { panel.classList.remove('visible'); return; }
+
+  panel.classList.add('visible');
+
+  // Header with "Fix all" button
+  const header = document.createElement('div'); header.className='alerts-header';
+  const titleWrap = document.createElement('div');
+  titleWrap.innerHTML = `<div class="alerts-title">${unique.length} layout issue${unique.length>1?'s':''} found</div><div class="alerts-count" style="margin-top:2px">Fix individually or tap Optimize bed to resolve all at once</div>`;
+  const fixAllBtn = document.createElement('button'); fixAllBtn.className='opt-accept-btn';
+  fixAllBtn.style.cssText='font-size:10px;padding:4px 10px';
+  fixAllBtn.textContent='Fix all';
+  fixAllBtn.addEventListener('click', () => runOptimize(bedId));
+  header.appendChild(titleWrap); header.appendChild(fixAllBtn);
+  panel.appendChild(header);
+
+  const list = document.createElement('div'); list.className='alerts-list';
+  unique.forEach((alert, alertIdx) => {
+    const card = document.createElement('div'); card.className=`alert-card ${alert.severity}`;
+    const body = document.createElement('div'); body.className='alert-body';
+    const msgEl = document.createElement('div'); msgEl.className='alert-msg'; msgEl.innerHTML=alert.msg;
+    const fixEl = document.createElement('div'); fixEl.className='alert-fix'; fixEl.innerHTML='💡 '+alert.fix;
+    body.appendChild(msgEl); body.appendChild(fixEl);
+
+    // Individual fix button
+    if (alert.fixAction) {
+      const fixBtn = document.createElement('button');
+      fixBtn.className='alert-fix-btn';
+      fixBtn.textContent='Fix this ↗';
+      fixBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        fixBtn.textContent='Fixed ✓';
+        fixBtn.disabled = true;
+        fixBtn.style.opacity='0.5';
+        applyAlertFix(bedId, alert);
+      });
+      body.appendChild(fixBtn);
+    }
+
+    card.innerHTML=''; // clear
+    const swatch = document.createElement('div'); swatch.className='alert-swatch'; swatch.style.background=alert.color;
+    card.appendChild(swatch); card.appendChild(body);
+    list.appendChild(card);
+  });
+  panel.appendChild(list);
+}
+
+function runOptimize(bedId) {
+  const def = BEDS_DEF.find(b => b.id === bedId);
+  if (!def) return;
+  const currentLayout = [...(bedLayouts[bedId] || def.defaultLayout)];
+  const voidSet = def.voids ? new Set(def.voids) : null;
+  const optimized = OPTIMIZER.optimize(currentLayout, def.cols, voidSet, getBedSun(bedId));
+
+  // Count differences
+  let diffCount = 0;
+  currentLayout.forEach((k,i) => { if (k !== optimized[i]) diffCount++; });
+
+  const previewPanel = document.getElementById('opt-preview-'+bedId);
+  if (!previewPanel) return;
+  previewPanel.innerHTML = '';
+  previewPanel.classList.add('visible');
+
+  // Header
+  const header = document.createElement('div'); header.className='opt-preview-header';
+  const title = document.createElement('div'); title.className='opt-preview-title';
+  title.textContent = diffCount > 0 ? `Optimized layout — ${diffCount} cell${diffCount>1?'s':''} moved` : 'Layout is already well optimized!';
+  const actions = document.createElement('div'); actions.className='opt-preview-actions';
+  if (diffCount > 0) {
+    const accept = document.createElement('button'); accept.className='opt-accept-btn'; accept.textContent='Apply layout';
+    accept.addEventListener('click', () => {
+      bedLayouts[bedId] = optimized;
+      saveLayouts();
+      renderBed(bedId);
+      previewPanel.classList.remove('visible');
+      setTimeout(() => runAlerts(bedId), 100);
+    });
+    actions.appendChild(accept);
+  }
+  const reject = document.createElement('button'); reject.className='opt-reject-btn'; reject.textContent='Dismiss';
+  reject.addEventListener('click', () => previewPanel.classList.remove('visible'));
+  actions.appendChild(reject);
+  header.appendChild(title); header.appendChild(actions);
+  previewPanel.appendChild(header);
+
+  if (diffCount === 0) {
+    const noChange = document.createElement('div'); noChange.className='no-alerts';
+    noChange.textContent = 'Your companion planting and sun placement are already well optimized. No changes needed.';
+    previewPanel.appendChild(noChange);
+    return;
+  }
+
+  // Side-by-side grids
+  const gridsWrap = document.createElement('div'); gridsWrap.className='opt-preview-grids';
+
+  function makePreviewGrid(layout, label) {
+    const wrap = document.createElement('div'); wrap.className='opt-grid-wrap';
+    const lbl = document.createElement('div'); lbl.className='opt-grid-label'; lbl.textContent=label;
+    wrap.appendChild(lbl);
+    const gridWrap = document.createElement('div'); gridWrap.style.cssText='overflow-x:auto;-webkit-overflow-scrolling:touch';
+    const rows = Math.ceil(layout.length / def.cols);
+    for (let r = 0; r < rows; r++) {
+      const row = document.createElement('div'); row.className='grid-row';
+      for (let c = 0; c < def.cols; c++) {
+        const i = r*def.cols+c;
+        const key = layout[i]||'empty';
+        const isVoid = voidSet && voidSet.has(i);
+        const cell = document.createElement('div');
+        cell.className = 'gcell' + (isVoid?' gcell-void':'');
+        if (!isVoid && key !== 'empty') {
+          const p = PLANTS[key];
+          if (p) {
+            cell.style.background = p.bg;
+            cell.appendChild(makePixelCanvas(key));
+            const lbl2 = document.createElement('div'); lbl2.className='gcell-lbl'; lbl2.textContent=p.label;
+            cell.appendChild(lbl2);
+            // Highlight changed cells
+            if (label==='Optimized' && key !== currentLayout[i]) {
+              cell.style.outline = '2px solid var(--sun)';
+              cell.style.outlineOffset = '1px';
+              cell.style.borderRadius = '4px';
+            }
+          }
+        }
+        row.appendChild(cell);
+      }
+      gridWrap.appendChild(row);
+    }
+    wrap.appendChild(gridWrap);
+    return wrap;
+  }
+
+  gridsWrap.appendChild(makePreviewGrid(currentLayout, 'Current'));
+  gridsWrap.appendChild(makePreviewGrid(optimized, 'Optimized'));
+  previewPanel.appendChild(gridsWrap);
+
+  // Alert comparison
+  const beforeAlerts = OPTIMIZER.generateAlerts(currentLayout, def.cols, getBedSun(bedId), bedId).length;
+  const afterAlerts  = OPTIMIZER.generateAlerts(optimized,     def.cols, getBedSun(bedId), bedId).length;
+  const summary = document.createElement('div');
+  summary.style.cssText='font-size:11px;color:var(--ink-light);padding:.5rem 1rem;border-top:1px solid var(--fog)';
+  summary.innerHTML = `Issues: <strong>${beforeAlerts}</strong> → <strong style="color:var(--leaf)">${afterAlerts}</strong> after optimization`;
+  previewPanel.appendChild(summary);
+
+  // Scroll into view
+  previewPanel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+/* ═══════════ BED DEFINITIONS ═══════════ */
+const BEDS_DEF = [
+  {
+    id:'bedA', title:'Bed A — 40×58 in rounded rectangle',
+    meta:'East fence · near jasmine · AM full sun 5–7 hrs · cool season',
+    cols:3,
+    defaultLayout:['marigold','marigold','marigold','kale','parsley','kale','arugula','cilantro','arugula','spinach','greenonion','spinach','carrot','onion','carrot'],
+    companion:'Marigold border repels nematodes. Parsley center attracts predatory wasps. Cilantro flowers bring beneficials. Carrots + onions — onion scent confuses carrot fly.',
+    stagger:[{week:'Week 1',color:'#639922',note:'Arugula + spinach direct sow'},{week:'Week 1',color:'#1D9E75',note:'Cilantro sow (Slo-Bolt)'},{week:'Week 3',color:'#97C459',note:'Arugula succession'},{week:'Week 5',color:'#C0DD97',note:'Spinach succession'}]
+  },
+  {
+    id:'bedB', title:'Bed B — 40×58 in rounded rectangle',
+    meta:'East fence · near tiki hut · AM full sun 5–7 hrs · root veg + brassica',
+    cols:3,
+    defaultLayout:['marigold','nasturtium','marigold','cabbage','cabbage','garlic','kale','kale','garlic','carrot','carrot','onion','carrot','parsley','carrot'],
+    companion:'Nasturtium trap crop — aphids choose it over cabbage. Garlic beside kale acts as passive fungicide. Parsley attracts parasitic wasps.',
+    stagger:[{week:'Oct wk1',color:'#712B13',note:'Garlic cloves 4 in deep'},{week:'Oct wk2',color:'#173404',note:'Cabbage transplants'},{week:'Oct wk3',color:'#993C1D',note:'Carrots direct sow'},{week:'Nov wk1',color:'#D85A30',note:'Short-day onion sets only'}]
+  },
+  {
+    id:'bedC', title:'Bed C — 41 in round bed',
+    meta:'East fence · herb hub · year-round',
+    cols:3,
+    defaultLayout:['marigold','basil','marigold','greenonion','greenonion','greenonion','marigold','cilantro','parsley'],
+    companion:'Herb hub. Marigolds on all corners. Basil center. Green onion ring confuses pests. Cilantro and parsley catch edge sunlight.',
+    stagger:[{week:'Apr–Sep',color:'#085041',note:'Basil transplant, pinch flowers weekly'},{week:'Oct–Mar',color:'#1D9E75',note:'Cilantro every 3 weeks'},{week:'Year-round',color:'#5F5E5A',note:'Green onion resow as needed'}]
+  },
+];
+
+function renderBed(bedId) {
+  const def = BEDS_DEF.find(b => b.id === bedId);
+  if (!def) return;
+  // load saved layout or use default
+  const saved = loadLayouts();
+  bedLayouts[bedId] = saved[bedId] || [...def.defaultLayout];
+  const layout = bedLayouts[bedId];
+  const existing = document.getElementById('bed-card-'+bedId);
+  const card = buildBedCard(def, layout);
+  if (existing) existing.replaceWith(card);
+  else document.getElementById('beds-abc').appendChild(card);
+  // Rebuild palette UI to reflect current edit mode after re-render
+  const toolbar = document.getElementById('toolbar-'+bedId);
+  const palette = document.getElementById('palette-'+bedId);
+  if (toolbar && palette) buildPalette(bedId, palette, toolbar);
+}
+
+function buildBedCard(def, layout) {
+  const card = document.createElement('div');
+  card.className='bed-wrap'; card.id='bed-card-'+def.id;
+  card.innerHTML=`<div class="bed-name">${def.title}</div><div class="bed-meta">${def.meta}</div>`;
+
+  // Toolbar
+  const toolbar = document.createElement('div'); toolbar.className='edit-toolbar'; toolbar.id='toolbar-'+def.id;
+  card.appendChild(toolbar);
+  // Palette
+  const palette = document.createElement('div'); palette.className='palette-wrap'; palette.id='palette-'+def.id;
+  card.appendChild(palette);
+  // Alerts panel
+  const alertsPanel = document.createElement('div'); alertsPanel.className='alerts-panel'; alertsPanel.id='alerts-'+def.id;
+  card.appendChild(alertsPanel);
+  // Optimize preview panel
+  const previewPanel = document.createElement('div'); previewPanel.className='opt-preview'; previewPanel.id='opt-preview-'+def.id;
+  card.appendChild(previewPanel);
+  // Build palette (initializes toolbar)
+  buildPalette(def.id, palette, toolbar);
+  // Run alerts on load
+  setTimeout(() => runAlerts(def.id), 50);
+
+  const body = document.createElement('div'); body.className='bed-body';
+  const ga = document.createElement('div'); ga.className='grid-area';
+  const cl = document.createElement('div'); cl.className='compass-label'; cl.textContent='N ↑ sun rises east';
+  ga.appendChild(cl);
+  ga.appendChild(makeGrid(layout, def.cols, null, def.id));
+  body.appendChild(ga);
+
+  const info = document.createElement('div'); info.className='bed-info';
+  info.appendChild(makeLegend(layout, null));
+  const note = document.createElement('div'); note.className='companion-box';
+  note.innerHTML=`<strong>Companion logic:</strong> ${def.companion}`;
+  info.appendChild(note);
+  info.appendChild(makeCountGrid(layout, null));
+  info.appendChild(makeStagger(def.stagger));
+  // Soil & fertilizer panel based on current layout
+  const sfPlants = bedLayouts[def.id] || def.defaultLayout;
+  const sfPanel = buildSoilFertPanel(sfPlants);
+  if (sfPanel) info.appendChild(sfPanel);
+  body.appendChild(info);
+  card.appendChild(body);
+  return card;
+}
+
+// Initial render
+bedLayouts = loadLayouts();
+BEDS_DEF.forEach(def => {
+  if (!bedLayouts[def.id]) bedLayouts[def.id] = [...def.defaultLayout];
+  document.getElementById('beds-abc').appendChild(buildBedCard(def, bedLayouts[def.id]));
+});
+
+/* ═══════════ BED D SEASON TOGGLE + E-SHAPE CANVAS ═══════════ */
+let bedDCoolSeason = false;
+const BEDD_WARM_LAYOUT = [];
+const BEDD_COOL_LAYOUT = [];
+
+function plantAtWarm(r,c) {
+  const inL=c<=3,inC=c>=8&&c<=11,inR=c>=16&&c<=19;
+  const lc=inL?c:inC?c-8:inR?c-16:c;
+  if(r<=1){
+    if(r===0)return(c===0||c===19||c===3||c===8||c===11||c===16)?'borage':'marigold';
+    if(inL)return lc%2===0?'tomato':'basil';
+    if(inC)return lc%2===0?'cantaloupe':'basil';
+    if(inR)return lc%2===0?'tomato':'basil';
+    return lc%3===0?'pepper':'basil';
+  }
+  if(r===3)return(lc===0||lc===3)?'nasturtium':'calendula';
+  if(r===2){if(lc===0||lc===3)return'marigold';if(inC)return lc===1?'cantaloupe':'basil';return lc===1?'tomato':'basil';}
+  return'basil';
+}
+function plantAtCool(r,c) {
+  const inL=c<=3,inC=c>=8&&c<=11,inR=c>=16&&c<=19;
+  const lc=inL?c:inC?c-8:inR?c-16:c;
+  if(r<=1){
+    if(r===0)return(c===0||c===19||c===3||c===8||c===11||c===16)?'borage':'marigold';
+    if(inL)return lc%2===0?'kale':'spinach';
+    if(inC)return lc%2===0?'arugula':'cilantro';
+    if(inR)return lc%2===0?'kale':'spinach';
+    return lc%2===0?'garlic':'onion';
+  }
+  if(r===3)return(lc===0||lc===3)?'nasturtium':'marigold';
+  if(r===2){if(lc===0||lc===3)return'marigold';if(inC)return lc===1?'carrot':'parsley';return lc===1?'spinach':'kale';}
+  return'cilantro';
+}
+
+function toggleBedDSeason() {
+  bedDCoolSeason = !bedDCoolSeason;
+  const toggle = document.getElementById('bedD-toggle');
+  const label  = document.getElementById('bedD-label');
+  toggle.classList.toggle('off', bedDCoolSeason);
+  label.innerHTML = bedDCoolSeason
+    ? '<strong>Cool season</strong> — kale, spinach, arugula, carrots'
+    : '<strong>Warm season</strong> — tomato, pepper, cantaloupe, basil';
+  drawEBed();
+}
+
+(function initEBed() {
+  const COLS=20, ROWS=4;
+  function isBed(r,c){ return r<=1||(c<=3)||(c>=8&&c<=11)||(c>=16&&c<=19); }
+
+  const CS=36, GAP=3, STEP=CS+GAP;
+  const PAD=12, BAN_ROWS=3;
+  const DIV_H=20;
+  const W = PAD*2 + COLS*STEP - GAP + 8;
+  const H = PAD + 14 + (BAN_ROWS+ROWS)*STEP - GAP + DIV_H + 36;
+
+  const cv = document.getElementById('ebed');
+  cv.width=W; cv.height=H;
+  const sc = Math.min(1, (window.innerWidth - 32) / W);
+  cv.style.width  = Math.round(W*sc)+'px';
+  cv.style.height = Math.round(H*sc)+'px';
+  const ctx = cv.getContext('2d');
+
+  const BG='#faf6ee', VOID='#ece4d8', LC='#a08060', DC='#c8bfa8';
+
+  function drawC(x,y,key) {
+    const p=PLANTS[key]; if(!p) return;
+    ctx.fillStyle=p.bg; ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=0.5;
+    ctx.beginPath(); ctx.roundRect(x,y,CS,CS,3); ctx.fill(); ctx.stroke();
+    const px=PX[key];
+    if(px){const off=3,sz=(CS-off*2)/8;px.forEach((row,r)=>row.forEach((v,c)=>{if(v){ctx.fillStyle='rgba(255,255,255,.82)';ctx.fillRect(x+off+c*sz,y+off+r*sz,sz,sz);}}));}
+    if(p.label&&key!=='zone'&&key!=='fence'){
+      ctx.fillStyle='rgba(255,255,255,.82)'; ctx.font='500 6px sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='bottom';
+      ctx.fillText(p.label,x+CS/2,y+CS-2);
+    }
+    if(p.sqft>1){
+      ctx.fillStyle='rgba(0,0,0,.45)'; ctx.beginPath(); ctx.roundRect(x+CS-14,y+2,12,10,2); ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font='500 6px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('x'+p.sqft,x+CS-8,y+7);
+    }
+  }
+  function drawV(x,y){ ctx.fillStyle=VOID; ctx.strokeStyle='rgba(0,0,0,.05)'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.roundRect(x,y,CS,CS,3); ctx.fill(); ctx.stroke(); }
+  function lbl(t,x,y,align,sz){ ctx.fillStyle=LC; ctx.font=(sz||9)+'px sans-serif'; ctx.textAlign=align||'left'; ctx.textBaseline='middle'; ctx.fillText(t,x,y); }
+
+  const hitMap = [];
+
+  function drawBed() {
+    const BNY=PAD+14;
+    // fence
+    for(let c=0;c<COLS;c++){ const p=PLANTS.fence; ctx.fillStyle=p.bg; ctx.strokeStyle='rgba(0,0,0,.08)'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.roundRect(PAD+c*STEP,BNY,CS,CS,3); ctx.fill(); ctx.stroke(); }
+    lbl('SOUTH FENCE',PAD,BNY+CS/2,'left',8);
+    // 2ft gap
+    for(let c=0;c<COLS;c++){ ctx.fillStyle=PLANTS.zone.bg; ctx.strokeStyle='rgba(0,0,0,.05)'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.roundRect(PAD+c*STEP,BNY+STEP,CS,CS,3); ctx.fill(); ctx.stroke(); }
+    lbl('2 ft',PAD,BNY+STEP+CS/2,'left',8);
+    // banana stools
+    const banPos={4:'banana',5:'bananapup',13:'banana',14:'bananapup'};
+    for(let c=0;c<COLS;c++){
+      if(banPos[c]) drawC(PAD+c*STEP,BNY+STEP*2,banPos[c]);
+      else{ ctx.fillStyle=PLANTS.zone.bg; ctx.strokeStyle='rgba(0,0,0,.04)'; ctx.lineWidth=0.5; ctx.beginPath(); ctx.roundRect(PAD+c*STEP,BNY+STEP*2,CS,CS,3); ctx.fill(); ctx.stroke(); }
+    }
+    lbl('Stool 1',PAD+4.5*STEP,BNY+STEP*2+CS+9,'center',8);
+    lbl('Stool 2',PAD+13.5*STEP,BNY+STEP*2+CS+9,'center',8);
+
+    const DIVY=BNY+3*STEP+8;
+    ctx.strokeStyle=DC; ctx.lineWidth=1; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(PAD,DIVY); ctx.lineTo(PAD+COLS*STEP-GAP,DIVY); ctx.stroke();
+    ctx.setLineDash([]);
+    lbl('↑ banana zone  ·  bed back bar ↓',PAD+(COLS*STEP-GAP)/2,DIVY+9,'center',8);
+
+    const BEDY=DIVY+20;
+    lbl('BED D — E-shape  ('+(bedDCoolSeason?'cool':'warm')+' season · tap Edit tiles to swap)',PAD,BEDY-8,'left',8);
+
+    hitMap.length=0;
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        const x=PAD+c*STEP, y=BEDY+r*STEP;
+        if(isBed(r,c)){
+          const key = bedDCoolSeason ? plantAtCool(r,c) : plantAtWarm(r,c);
+          drawC(x,y,key);
+          hitMap.push({x,y,key,r,c});
+        } else { drawV(x,y); hitMap.push({x,y,key:'_void'}); }
+      }
+    }
+
+    const poolY=BEDY+ROWS*STEP+4;
+    ctx.fillStyle='rgba(100,180,220,.2)'; ctx.beginPath(); ctx.roundRect(PAD,poolY,COLS*STEP-GAP,13,3); ctx.fill();
+    ctx.fillStyle=LC; ctx.font='8px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('← pool side — open access pockets →',PAD+(COLS*STEP-GAP)/2,poolY+6);
+
+    ctx.strokeStyle=LC; ctx.lineWidth=0.7; ctx.setLineDash([]);
+    [[0,3,'Left arm (4×4)'],[8,11,'Center arm (4×4)'],[16,19,'Right arm (4×4)']].forEach(([cs,ce,t])=>{
+      const x1=PAD+cs*STEP,x2=PAD+ce*STEP+CS,mx=(x1+x2)/2;
+      ctx.beginPath(); ctx.moveTo(x1,poolY+17); ctx.lineTo(x1,poolY+20); ctx.lineTo(x2,poolY+20); ctx.lineTo(x2,poolY+17); ctx.stroke();
+      ctx.fillStyle=LC; ctx.font='7.5px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText(t,mx,poolY+22);
+    });
+
+    // banana hit zones
+    const BNY2=BNY;
+    for(let c=0;c<COLS;c++){
+      [['fence',BNY2],['zone',BNY2+STEP]].forEach(([k,y])=>hitMap.push({x:PAD+c*STEP,y,key:k}));
+      hitMap.push({x:PAD+c*STEP,y:BNY2+STEP*2,key:banPos[c]||'zone'});
+    }
+
+    // legend + counts
+    const leg=document.getElementById('ebed-legend');
+    const cc=document.getElementById('ebed-counts');
+    if(leg){ leg.innerHTML=''; const seen=new Set();
+      hitMap.filter(h=>h.key&&h.key!=='_void'&&h.key!=='zone'&&h.key!=='fence').forEach(h=>{
+        if(seen.has(h.key))return; seen.add(h.key); const p=PLANTS[h.key]; if(!p)return;
+        const item=document.createElement('div'); item.className='leg-item';
+        item.innerHTML=`<div class="leg-dot" style="background:${p.bg}"></div>${p.label}`;
+        leg.appendChild(item);
+      });
+    }
+    if(cc){ cc.innerHTML=''; const counts={};
+      hitMap.filter(h=>h.key&&h.key!=='_void'&&h.key!=='zone'&&h.key!=='fence'&&h.r!==undefined).forEach(h=>counts[h.key]=(counts[h.key]||0)+1);
+      Object.entries(counts).sort((a,b)=>b[1]-a[1]).forEach(([k,n])=>{
+        const p=PLANTS[k]; if(!p)return;
+        const total=p.sqft>0?n*p.sqft:n;
+        const label=p.sqft>1?`${n} cells = ${total} seeds`:`${n} plant${n>1?'s':''}`;
+        const d=document.createElement('div'); d.className='count-cell';
+        d.innerHTML=`<span>${p.label}</span><span>${label}</span>`;
+        cc.appendChild(d);
+      });
+    }
+  }
+
+  ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+  drawBed();
+  window.drawEBed = drawBed;
+
+  // Tooltip + tap handler
+  function handleCanvasInteraction(e, isTap) {
+    const r=cv.getBoundingClientRect();
+    const sx=cv.width/r.width, sy=cv.height/r.height;
+    const ex = e.touches ? e.touches[0].clientX : e.clientX;
+    const ey = e.touches ? e.touches[0].clientY : e.clientY;
+    const mx=(ex-r.left)*sx, my=(ey-r.top)*sy;
+    const h=hitMap.find(h=>mx>=h.x&&mx<=h.x+CS&&my>=h.y&&my<=h.y+CS);
+    if(!h||h.key==='_void') { if(!isTap) tip.style.display='none'; return; }
+    if(isTap) { showTip({clientX:ex,clientY:ey}, h.key); setTimeout(()=>tip.style.display='none',2500); }
+    else showTip({clientX:ex,clientY:ey}, h.key);
+  }
+  cv.addEventListener('mousemove', e => handleCanvasInteraction(e, false));
+  cv.addEventListener('mouseleave', () => tip.style.display='none');
+  cv.addEventListener('touchstart', e => { e.preventDefault(); handleCanvasInteraction(e, true); }, {passive:false});
+
+  // Resize
+  window.addEventListener('resize', () => {
+    const sc2=Math.min(1,(window.innerWidth-32)/W);
+    cv.style.width=Math.round(W*sc2)+'px'; cv.style.height=Math.round(H*sc2)+'px';
+  });
+})();
+
+/* ═══════════ BANANA STANDALONE GRID ═══════════ */
+/* banana grid removed — mat diagram now inline SVG */
+
+/* ═══════════ CALENDAR ═══════════ */
+(function(){
+  const crops=[
+    {name:'Tomato',     plant:[0,1,8,9,10,11],ongoing:[2,3,4,5]},
+    {name:'Pepper',     plant:[0,1,8,9,10,11],ongoing:[2,3,4,5,6,7]},
+    {name:'Cantaloupe', plant:[1,2,8,9],       ongoing:[3,4]},
+    {name:'Basil',      plant:[2,3,4,5,6,7,8,9],ongoing:[5,6,7,8]},
+    {name:'Kale',       plant:[9,10,11,0,1],   ongoing:[10,11,0,1,2]},
+    {name:'Spinach',    plant:[9,10,11,0,1],   ongoing:[11,0,1,2]},
+    {name:'Arugula',    plant:[9,10,11,0,1,2], ongoing:[10,11,0,1,2,3]},
+    {name:'Cilantro',   plant:[9,10,11,0,1],   ongoing:[10,11,0,1,2]},
+    {name:'Carrot',     plant:[9,10,11,0],      ongoing:[11,0,1,2,3]},
+    {name:'Onion',      plant:[9,10,11],        ongoing:[0,1,2,3]},
+    {name:'Garlic',     plant:[9,10,11],        ongoing:[0,1,2,3,4]},
+    {name:'Parsley',    plant:[9,10,11,0,1],    ongoing:[10,11,0,1,2,3]},
+    {name:'Green onion',plant:[9,10,11,0,1,2,3,4],ongoing:[11,0,1,2,3,4]},
+    {name:'Cabbage',    plant:[9,10,11],        ongoing:[0,1,2]},
+    {name:'Marigold',   plant:[0,1,2,8,9,10,11],ongoing:[3,4,5,6,7]},
+  ];
+  const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const cal=document.getElementById('calendar-container');
+  const hr=document.createElement('div'); hr.className='cal-header-row';
+  MONTHS.forEach(m=>{const s=document.createElement('div');s.className='cal-month-lbl';s.textContent=m;hr.appendChild(s);});
+  cal.appendChild(hr);
+  crops.forEach(crop=>{
+    const row=document.createElement('div'); row.className='cal-row';
+    const lbl=document.createElement('div'); lbl.className='cal-row-label'; lbl.textContent=crop.name; row.appendChild(lbl);
+    for(let m=0;m<12;m++){
+      const seg=document.createElement('div'); seg.className='cal-segment';
+      seg.style.background=crop.plant.includes(m)?'#4a7c23':crop.ongoing.includes(m)?'#e8a020':'#e8e0d4';
+      row.appendChild(seg);
+    }
+    cal.appendChild(row);
+  });
+  const cleg=document.createElement('div'); cleg.className='cal-legend';
+  cleg.innerHTML='<div class="cal-leg"><div class="cal-leg-dot" style="background:#4a7c23"></div>Plant/sow</div><div class="cal-leg"><div class="cal-leg-dot" style="background:#e8a020"></div>Ongoing/harvest</div><div class="cal-leg"><div class="cal-leg-dot" style="background:#e8e0d4"></div>Rest</div>';
+  cal.appendChild(cleg);
+})();
+
+/* ═══════════ THIS WEEK ═══════════ */
+(function(){
+  const TASKS=[
+    {id:'t1',tag:'harvest',title:'Harvest cool-season greens',detail:'Cut kale, spinach, arugula before they bolt. Heat coming in May ends their season — take what you can now.'},
+    {id:'t2',tag:'plant',  title:'Plant basil in all beds',detail:'Perfect window. Basil loves the warming temps. Put transplants beside tomatoes in Bed D and center of Bed C.'},
+    {id:'t3',tag:'urgent', title:'Start Bed D soil prep',detail:'Fill the E-shape bed with your Mel\'s Mix so soil can settle before May tomato planting.'},
+    {id:'t4',tag:'plant',  title:'Transplant banana stools',detail:'April is ideal for establishing bananas in Zone 10a. Rainy season in June helps them root before peak heat.'},
+    {id:'t5',tag:'water',  title:'Adjust watering schedule',detail:'Shift from every 2–3 days to daily checks as temps climb past 85°F. Raised beds dry fast in April sun.'},
+    {id:'t6',tag:'harvest',title:'Harvest ripe tomatoes',detail:'Feb-planted tomatoes should be fruiting. Pick regularly — it encourages more fruit set before summer.'},
+    {id:'t7',tag:'plant',  title:'Sow cantaloupe in Bed D',detail:'Plant Seminole or Athena seeds now. Set up trellis along south fence — vines grow 6–8 ft.'},
+    {id:'t8',tag:'urgent', title:'Check for whiteflies',detail:'April warmth triggers whitefly populations. Check leaf undersides on kale and tomatoes. Deploy yellow sticky traps.'},
+    {id:'t9',tag:'plant',  title:'Succession sow cilantro',detail:'One more round of Slo-Bolt before the heat ends the season. It\'ll bolt in 3–4 weeks but still worth harvesting.'},
+    {id:'t10',tag:'water', title:'Set up drip irrigation',detail:'Before summer heat arrives, get drip lines on a 6 AM timer. This single upgrade saves your garden Jun–Sep.'},
+    {id:'t11',tag:'harvest',title:'Pull bolting arugula',detail:'Any arugula sending up flower stalks has turned bitter. Pull, compost, replant spot in October.'},
+    {id:'t12',tag:'urgent',title:'Soil test Bed D',detail:'Take a sample to Pinellas County Extension (~$7) before filling Bed D. Knowing pH informs your compost ratio.'},
+  ];
+  function getWeekKey(){ const d=new Date(),day=d.getDay(),mon=new Date(d); mon.setDate(d.getDate()-(day===0?6:day-1)); return mon.toISOString().slice(0,10); }
+  const KEY='garden_tasks_'+getWeekKey();
+  let done=JSON.parse(localStorage.getItem(KEY)||'[]');
+  const tagL={urgent:'Urgent',plant:'Plant now',water:'Water',harvest:'Harvest'};
+  const tagC={urgent:'tag-urgent',plant:'tag-plant',water:'tag-water',harvest:'tag-harvest'};
+  function render(){
+    const grid=document.getElementById('thisweek-grid'); if(!grid)return;
+    grid.innerHTML='';
+    TASKS.forEach(task=>{
+      const isDone=done.includes(task.id);
+      const card=document.createElement('div'); card.className='task-card'+(isDone?' done':'');
+      card.innerHTML=`<div class="task-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="task-tag ${tagC[task.tag]}">${tagL[task.tag]}</div><div class="task-title">${task.title}</div><div class="task-detail">${task.detail}</div></div>`;
+      card.addEventListener('click',()=>{ if(done.includes(task.id)) done=done.filter(d=>d!==task.id); else done.push(task.id); localStorage.setItem(KEY,JSON.stringify(done)); render(); });
+      grid.appendChild(card);
+    });
+  }
+  render();
+})();
+
+/* ═══════════ PLANT HEALTH TRACKER ═══════════ */
+(function(){
+  const TRACKED=[
+    {id:'p_kale_a',key:'kale',name:'Kale',bed:'Bed A'},{id:'p_arugula_a',key:'arugula',name:'Arugula',bed:'Bed A'},
+    {id:'p_spinach_a',key:'spinach',name:'Spinach',bed:'Bed A'},{id:'p_cilantro_a',key:'cilantro',name:'Cilantro',bed:'Bed A'},
+    {id:'p_carrot_a',key:'carrot',name:'Carrots',bed:'Bed A'},{id:'p_onion_a',key:'onion',name:'Onions',bed:'Bed A'},
+    {id:'p_kale_b',key:'kale',name:'Kale',bed:'Bed B'},{id:'p_cabbage_b',key:'cabbage',name:'Cabbage',bed:'Bed B'},
+    {id:'p_garlic_b',key:'garlic',name:'Garlic',bed:'Bed B'},{id:'p_carrot_b',key:'carrot',name:'Carrots',bed:'Bed B'},
+    {id:'p_basil_c',key:'basil',name:'Basil',bed:'Bed C'},{id:'p_gonion_c',key:'greenonion',name:'Green onion',bed:'Bed C'},
+    {id:'p_cilantro_c',key:'cilantro',name:'Cilantro',bed:'Bed C'},
+    {id:'p_tomato_d',key:'tomato',name:'Tomato',bed:'Bed D'},{id:'p_pepper_d',key:'pepper',name:'Pepper',bed:'Bed D'},
+    {id:'p_basil_d',key:'basil',name:'Basil',bed:'Bed D'},{id:'p_cant_d',key:'cantaloupe',name:'Cantaloupe',bed:'Bed D'},
+  ];
+  const STOR='garden_health_v1';
+  const load=()=>JSON.parse(localStorage.getItem(STOR)||'{}');
+  const save=d=>localStorage.setItem(STOR,JSON.stringify(d));
+  const hL=['','Poor','Fair','Good','Great','Thriving'];
+  const hC=['','#E24B4A','#EF9F27','#97C459','#4a7c23','#2d5016'];
+  function renderTracker(){
+    const grid=document.getElementById('tracker-grid'); if(!grid)return;
+    const data=load(); grid.innerHTML='';
+    TRACKED.forEach(plant=>{
+      const state=data[plant.id]||{stars:0,notes:''};
+      const p=PLANTS[plant.key]||{bg:'#888'};
+      const card=document.createElement('div'); card.className='plant-card';
+      card.innerHTML=`<div class="plant-card-header"><div class="plant-dot" style="background:${p.bg}"></div><div class="plant-card-name">${plant.name}</div><div class="plant-card-bed">${plant.bed}</div></div><div class="health-stars" id="stars-${plant.id}"></div><div class="health-bar-wrap"><div class="health-label"><span>Health</span><span id="hlbl-${plant.id}">${state.stars?hL[state.stars]:'Not rated'}</span></div><div class="health-track"><div class="health-fill" id="hbar-${plant.id}" style="width:${state.stars*20}%;background:${hC[state.stars]||'var(--fog)'}"></div></div></div><textarea class="notes-input" id="notes-${plant.id}" rows="2" placeholder="Notes, observations, issues...">${state.notes||''}</textarea>`;
+      grid.appendChild(card);
+      const starsEl=card.querySelector('#stars-'+plant.id);
+      for(let i=1;i<=5;i++){
+        const star=document.createElement('div'); star.className='star'+(i<=state.stars?' lit':'');
+        star.textContent='★'; star.style.color=hC[i];
+        star.addEventListener('click',()=>{ const d=load(); if(!d[plant.id])d[plant.id]={stars:0,notes:''}; d[plant.id].stars=i; save(d); card.querySelector('#hbar-'+plant.id).style.width=(i*20)+'%'; card.querySelector('#hbar-'+plant.id).style.background=hC[i]; card.querySelector('#hlbl-'+plant.id).textContent=hL[i]; starsEl.querySelectorAll('.star').forEach((s,idx)=>s.classList.toggle('lit',idx<i)); });
+        starsEl.appendChild(star);
+      }
+      const notesEl=card.querySelector('#notes-'+plant.id);
+      let t; notesEl.addEventListener('input',()=>{ clearTimeout(t); t=setTimeout(()=>{ const d=load(); if(!d[plant.id])d[plant.id]={stars:0,notes:''}; d[plant.id].notes=notesEl.value; save(d); },600); });
+    });
+  }
+  renderTracker();
+})();
+
+/* ═══════════ LOG ═══════════ */
+(function(){
+  const STOR='garden_log_v1';
+  const loadLog=()=>JSON.parse(localStorage.getItem(STOR)||'[]');
+  const saveLog=e=>localStorage.setItem(STOR,JSON.stringify(e));
+  const tL={water:'Watering',harvest:'Harvest',pest:'Pest spotted',note:'Note'};
+  const tC={water:'log-water',harvest:'log-harvest',pest:'log-pest',note:'log-note'};
+  function renderLog(){
+    const tbody=document.getElementById('log-tbody'); if(!tbody)return;
+    const entries=loadLog();
+    if(!entries.length){ tbody.innerHTML='<tr><td colspan="5" class="log-empty">No entries yet</td></tr>'; return; }
+    tbody.innerHTML='';
+    [...entries].reverse().forEach((e,ri)=>{
+      const realIdx=entries.length-1-ri;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${e.date}</td><td><span class="log-type-badge ${tC[e.type]}">${tL[e.type]}</span></td><td>${e.plant||'—'}</td><td>${e.note||'—'}</td><td><button class="del-btn" onclick="deleteLogEntry(${realIdx})">✕</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  window.addLogEntry=function(){
+    const type=document.getElementById('log-type').value;
+    const plant=document.getElementById('log-plant').value.trim();
+    const note=document.getElementById('log-note-text').value.trim();
+    const date=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const entries=loadLog(); entries.push({type,plant,note,date,ts:Date.now()}); saveLog(entries);
+    document.getElementById('log-plant').value=''; document.getElementById('log-note-text').value='';
+    renderLog();
+  };
+  window.deleteLogEntry=function(idx){ const e=loadLog(); e.splice(idx,1); saveLog(e); renderLog(); };
+  window.clearLog=function(){ if(confirm('Clear all log entries?')){ saveLog([]); renderLog(); } };
+  document.getElementById('log-note-text').addEventListener('keydown',e=>{ if(e.key==='Enter') addLogEntry(); });
+  renderLog();
+})();
+
+
+/* ═══════════ GROW BAG SYSTEM ═══════════ */
+const GB_STORAGE = 'garden_growbags_v1';
+
+// Gallon sizes and their recommended uses
+// Exact available grow bag sizes
+const GALLON_SIZES = [1, 2, 3, 5, 7, 10, 15, 20, 25, 30];
+
+const GALLON_GUIDE = {
+  1:  {label:'1 gal',  icon:'🌱', use:'Seedlings, herbs, green onion, radish'},
+  2:  {label:'2 gal',  icon:'🌿', use:'Herbs, lettuce, arugula, green onion'},
+  3:  {label:'3 gal',  icon:'🌿', use:'Basil, cilantro, parsley, zaatar, peppers'},
+  5:  {label:'5 gal',  icon:'🍅', use:'Cherry tomato, pepper, eggplant, curry leaf (minimum)'},
+  7:  {label:'7 gal',  icon:'🍅', use:'Full-size tomato, longevity spinach, okinawa spinach, zaatar'},
+  10: {label:'10 gal', icon:'🍈', use:'Cantaloupe, cucumber, muscadine (young vine)'},
+  15: {label:'15 gal', icon:'🥭', use:'Carrie mango (minimum) · Fairchild mango (minimum)'},
+  20: {label:'20 gal', icon:'🥭', use:'Carrie mango (good) · Fairchild mango (good) · Muscadine vine'},
+  25: {label:'25 gal', icon:'🥭', use:'Carrie mango (optimal) · Fairchild mango (optimal) · FL Best Peach (minimum)'},
+  30: {label:'30 gal', icon:'🍑', use:'FL Best Peach (optimal) · Large mango · Banana'},
+};
+
+// Soil mix by plant type
+function getGrowBagSoil(plantKey, gallons) {
+  const sf = SOIL_FERT[plantKey];
+  if (sf) return sf.soil;
+  if (gallons >= 15) return '40% premium compost · 20% pumice/perlite · 40% forest floor mulch · excellent drainage essential for large containers';
+  return 'Standard potting mix + 20% perlite · well-draining · refresh or repot every 1–2 years';
+}
+
+function loadGrowBags() {
+  return JSON.parse(localStorage.getItem(GB_STORAGE) || '[]');
+}
+function saveGrowBags(bags) {
+  localStorage.setItem(GB_STORAGE, JSON.stringify(bags));
+}
+
+function renderGrowBags() {
+  const grid = document.getElementById('growbag-grid');
+  if (!grid) return;
+  const bags = loadGrowBags();
+  grid.innerHTML = '';
+
+  bags.forEach((bag, idx) => {
+    const card = document.createElement('div');
+    card.className = 'growbag-card';
+    const p = PLANTS[bag.plant] || null;
+    const sf = bag.plant ? getSoilFert(bag.plant) : null;
+    const gg = GALLON_GUIDE[bag.gallons] || {icon:'🪴',label:bag.gallons+' gal'};
+    card.innerHTML = `
+      <div class="growbag-gallon">${gg.label}</div>
+      <div class="growbag-card-header">
+        <div class="growbag-icon">${gg.icon}</div>
+        <div>
+          <div class="growbag-name">${bag.name || (p ? p.label : 'Grow bag')}</div>
+          <div class="growbag-meta">${p ? p.label : 'No plant set'} · ${bag.gallons} gal fabric bag</div>
+        </div>
+      </div>
+      ${sf ? `<div class="growbag-soil"><span class="growbag-soil-lbl">Soil mix:</span>${sf.soil}</div>
+              <div class="growbag-soil" style="margin-top:.3rem"><span class="growbag-soil-lbl">Fertilizer:</span>${sf.fert}</div>` : ''}
+      <div style="display:flex;gap:6px;margin-top:.75rem">
+        <button class="btn btn-secondary btn-sm" onclick="editGrowBag(${idx})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteGrowBag(${idx})">Remove</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  // Add button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'growbag-add-btn';
+  addBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Add grow bag';
+  addBtn.addEventListener('click', () => openGrowBagModal());
+  grid.appendChild(addBtn);
+}
+
+function openGrowBagModal(existingIdx) {
+  const bags = loadGrowBags();
+  const bag = existingIdx !== undefined ? bags[existingIdx] : null;
+  const modal = document.getElementById('gb-modal-inner');
+  const backdrop = document.getElementById('gb-modal-backdrop');
+
+  // Build plant options from PLANTS
+  const plantOpts = Object.entries(PLANTS)
+    .filter(([k]) => !['banana','bananapup','zone','fence'].includes(k))
+    .map(([k,p]) => `<option value="${k}" ${bag?.plant===k?'selected':''}>${p.label}</option>`)
+    .join('');
+
+  const galOptions = GALLON_SIZES.map(g =>
+    `<button class="gpill${bag?.gallons==g?' active':''}" data-gal="${g}" onclick="selectGallon(this,'${g}')">${g} gal</button>`
+  ).join('');
+
+  modal.innerHTML = `
+    <div class="gb-modal-header">
+      <div class="gb-modal-title">${bag ? 'Edit' : 'Add'} grow bag</div>
+      <button class="gb-close" onclick="closeGrowBagModal()">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.9rem">
+      <div class="form-group">
+        <label class="form-label">Bag name / label</label>
+        <input type="text" class="form-input" id="gb-name" value="${bag?.name||''}" placeholder="e.g. Carrie Mango #1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Plant in this bag</label>
+        <select class="form-select" id="gb-plant" onchange="autoSelectMinGallon(); updateGrowBagSoilPreview();">
+          <option value="">Select plant…</option>${plantOpts}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bag size (gallons) <span id="gb-size-note" style="font-size:10px;color:var(--ink-pale);font-weight:300;margin-left:4px"></span></label>
+        <div class="gallon-pills" id="gallon-pills">${galOptions}</div>
+        <input type="hidden" id="gb-gallons" value="${bag?.gallons||5}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <input type="text" class="form-input" id="gb-notes" value="${bag?.notes||''}" placeholder="Location, date planted, variety…">
+      </div>
+      <div id="gb-soil-preview" style="font-size:11px;color:var(--ink-light);background:var(--parchment);border-radius:7px;padding:.6rem .75rem;line-height:1.6"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:.5rem;border-top:1px solid var(--fog)">
+        <button class="btn btn-secondary" onclick="closeGrowBagModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveGrowBag(${existingIdx !== undefined ? existingIdx : 'null'})">Save bag</button>
+      </div>
+    </div>`;
+
+  backdrop.classList.remove('hidden');
+  updateGrowBagSoilPreview();
+}
+
+function autoSelectMinGallon() {
+  const plant = document.getElementById('gb-plant')?.value;
+  if (!plant) return;
+  const minG = PLANT_MIN_GAL[plant];
+  if (!minG) return;
+  const current = parseInt(document.getElementById('gb-gallons')?.value)||5;
+  if (current < minG) {
+    // Find the nearest available size >= minG
+    const target = GALLON_SIZES.find(s => s >= minG) || minG;
+    document.getElementById('gb-gallons').value = target;
+    document.querySelectorAll('.gpill').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.gal) === target);
+    });
+  }
+}
+
+function selectGallon(btn, gal) {
+  document.querySelectorAll('.gpill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('gb-gallons').value = gal;
+  updateGrowBagSoilPreview();
+}
+
+// Minimum recommended gallon per plant
+const PLANT_MIN_GAL = {
+  carriemango:15, fairchildmango:15, flbestpeach:25,
+  muscadine:10, curryleaf:5, tomato:7, pepper:5,
+  cantaloupe:10, cucumber:10, beans:5, zaatar:3,
+  longevitysp:5, okinawasp:3, basil:3, kale:5,
+};
+const PLANT_OPT_GAL = {
+  carriemango:25, fairchildmango:25, flbestpeach:30,
+  muscadine:20, curryleaf:7, tomato:10,
+};
+
+function updateGrowBagSoilPreview() {
+  const plant   = document.getElementById('gb-plant')?.value;
+  const gallons = parseInt(document.getElementById('gb-gallons')?.value) || 5;
+  const preview = document.getElementById('gb-soil-preview');
+  if (!preview) return;
+  if (!plant) { preview.innerHTML = 'Select a plant to see soil and fertilizer recommendations.'; return; }
+
+  const sf   = getSoilFert(plant);
+  const gg   = GALLON_GUIDE[gallons] || {};
+  const minG = PLANT_MIN_GAL[plant];
+  const optG = PLANT_OPT_GAL[plant];
+  const p    = PLANTS[plant];
+
+  let warning = '';
+  if (minG && gallons < minG) {
+    warning = `<div style="background:rgba(196,97,42,.1);border-left:3px solid var(--terracotta);padding:5px 8px;border-radius:0 5px 5px 0;margin-bottom:6px;font-size:11px;color:var(--terracotta)">⚠ ${p?.label||plant} needs at least a <strong>${minG} gal</strong> bag — ${gallons} gal is too small for roots to develop properly.</div>`;
+  } else if (optG && gallons < optG) {
+    warning = `<div style="background:rgba(232,160,32,.1);border-left:3px solid var(--sun);padding:5px 8px;border-radius:0 5px 5px 0;margin-bottom:6px;font-size:11px;color:#7a4a00">💡 ${p?.label||plant} will fruit in ${gallons} gal but thrives best in <strong>${optG} gal</strong>.</div>`;
+  }
+
+  preview.innerHTML = warning +
+    `<strong style="color:var(--ink)">${p?.label||plant} · ${gallons} gal fabric bag</strong><br>
+    🌱 <strong>Soil:</strong> ${sf.soil}<br>
+    🌿 <strong>Feed:</strong> ${sf.fert}
+    ${gg.use ? '<br>💡 <strong>This size suits:</strong> '+gg.use : ''}`;
+
+  // Auto-suggest minimum size if needed
+  if (minG) {
+    const sizeNote = document.getElementById('gb-size-note');
+    if (sizeNote) sizeNote.textContent = minG ? 'Min: '+minG+' gal · '+(optG?'Optimal: '+optG+' gal':'') : '';
+  }
+}
+
+function saveGrowBag(idx) {
+  const name    = document.getElementById('gb-name').value.trim();
+  const plant   = document.getElementById('gb-plant').value;
+  const gallons = parseInt(document.getElementById('gb-gallons').value) || 5;
+  const notes   = document.getElementById('gb-notes').value.trim();
+  if (!plant) { alert('Please select a plant'); return; }
+  const bags = loadGrowBags();
+  const bag = { name: name || (PLANTS[plant]?.label||plant), plant, gallons, notes, createdAt: Date.now() };
+  if (idx !== null && idx !== undefined && idx !== 'null') bags[idx] = bag;
+  else bags.push(bag);
+  saveGrowBags(bags);
+  closeGrowBagModal();
+  // Pre-populate starter grow bags if none exist yet
+(function() {
+  const existing = JSON.parse(localStorage.getItem(GB_STORAGE) || '[]');
+  if (existing.length === 0) {
+    const starters = [
+      { name: 'Carrie Mango #1',    plant: 'carriemango',   gallons: 25, notes: 'Start in 15 gal, repot to 25 gal for peak production. South yard full sun.', createdAt: Date.now() },
+      { name: 'Fairchild Mango #1', plant: 'fairchildmango', gallons: 25, notes: 'Plant alongside Carrie. Both need same care. 25 gal optimal.', createdAt: Date.now()+1 },
+      { name: 'FL Best Peach #1',   plant: 'flbestpeach',    gallons: 30, notes: '30 gal for optimal root development. Full sun 8+ hrs. Fruit expected May.', createdAt: Date.now()+2 },
+    ];
+    localStorage.setItem(GB_STORAGE, JSON.stringify(starters));
+  }
+})();
+renderGrowBags();
+}
+
+function editGrowBag(idx) { openGrowBagModal(idx); }
+
+function deleteGrowBag(idx) {
+  const bags = loadGrowBags();
+  if (!confirm(`Remove "${bags[idx]?.name}"?`)) return;
+  bags.splice(idx, 1);
+  saveGrowBags(bags);
+  renderGrowBags();
+}
+
+function closeGrowBagModal() {
+  document.getElementById('gb-modal-backdrop')?.classList.add('hidden');
+}
+
+// Init grow bags
+renderGrowBags();
+
+/* ═══════════ TABS ═══════════ */
+function switchPage(page) {
+  document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  const pageEl = document.getElementById('page-'+page);
+  if (pageEl) pageEl.classList.add('active');
+  const tabMap = {plan:0,grow:1,track:2,garden:3};
+  const tabs = document.querySelectorAll('.nav-tab');
+  if (tabs[tabMap[page]]) tabs[tabMap[page]].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (page === 'plan' && window.drawEBed) window.drawEBed();
+}
+
+function showTab(group,id,e){
+  // e can be passed explicitly or fall back to window.event for onclick= usage
+  const src = (e && e.target) ? e.target : (window.event && window.event.target);
+  document.querySelectorAll('[id^="tab-'+group+'-"]').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+group+'-'+id).classList.add('active');
+  if(src){
+    const container = src.closest('.section-inner') || src.closest('section');
+    if(container) container.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    src.classList.add('active');
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garden Admin — St. Pete Garden Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --soil:#3d2b1f;--leaf:#2d5016;--leaf-mid:#4a7c23;--leaf-light:#7fb23a;
+  --leaf-pale:#b8d97a;--sun:#e8a020;--sun-pale:#f5d78e;--terracotta:#c4612a;
+  --cream:#faf6ee;--parchment:#f0e8d8;--fog:#e8e0d4;--ink:#1a1208;
+  --ink-light:#6b5740;--ink-pale:#a08060;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);font-weight:300;line-height:1.7;overflow-x:hidden}
+
+nav{background:var(--soil);display:flex;align-items:center;padding:0 1.25rem;height:52px;border-bottom:2px solid var(--terracotta);position:sticky;top:0;z-index:100}
+.nav-logo{font-family:'Playfair Display',serif;font-size:16px;color:var(--sun-pale);margin-right:auto}
+.nav-back{color:var(--fog);text-decoration:none;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:6px 14px;border:1px solid rgba(255,255,255,.2);border-radius:6px;transition:all .15s}
+.nav-back:hover{background:rgba(255,255,255,.1);color:var(--sun-pale)}
+.nav-save-indicator{font-size:11px;color:var(--leaf-light);margin-left:12px;opacity:0;transition:opacity .3s}
+.nav-save-indicator.show{opacity:1}
+
+.page{max-width:900px;margin:0 auto;padding:2rem 1.25rem 4rem}
+.page-header{margin-bottom:2.5rem}
+.page-eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--terracotta);margin-bottom:.4rem;font-weight:500}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--ink);line-height:1.2;margin-bottom:.5rem}
+.page-desc{font-size:13px;color:var(--ink-light);max-width:540px;line-height:1.65}
+
+.section{background:var(--cream);border:1px solid var(--fog);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;overflow:hidden}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--fog)}
+.section-num{width:30px;height:30px;border-radius:50%;background:var(--soil);color:var(--sun-pale);font-family:'Playfair Display',serif;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--ink)}
+.section-desc{font-size:12px;color:var(--ink-pale);margin-top:2px}
+
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11px;font-weight:500;color:var(--ink-light);letter-spacing:.04em;text-transform:uppercase}
+.form-input,.form-select{border:1px solid var(--fog);border-radius:7px;padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--parchment);color:var(--ink);outline:none;width:100%;transition:border-color .15s}
+.form-input:focus,.form-select:focus{border-color:var(--leaf-mid);background:var(--cream)}
+.form-hint{font-size:11px;color:var(--ink-pale);line-height:1.5}
+.form-row{display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap}
+
+.zone-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--soil);color:var(--sun-pale);border-radius:20px;font-size:13px;font-family:'Playfair Display',serif;margin-top:.5rem}
+.zone-badge .zone-num{font-size:18px;line-height:1}
+
+.btn{padding:8px 18px;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;font-weight:400;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-primary{background:var(--leaf-mid);color:#fff;border:none}
+.btn-primary:hover{background:var(--leaf)}
+.btn-secondary{background:transparent;color:var(--ink-light);border:1px solid var(--fog)}
+.btn-secondary:hover{border-color:var(--leaf-mid);color:var(--leaf)}
+.btn-danger{background:transparent;color:var(--terracotta);border:1px solid rgba(196,97,42,.3)}
+.btn-danger:hover{background:rgba(196,97,42,.08)}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem}
+
+/* BED BUILDER */
+.bed-builder-wrap{display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start}
+.builder-controls{flex:1;min-width:220px}
+.builder-canvas-area{flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.builder-toolbar{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.tool-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--fog);border-radius:6px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;background:var(--parchment);color:var(--ink-light);transition:all .12s;white-space:nowrap}
+.tool-btn svg{flex-shrink:0}
+.tool-btn:hover{border-color:var(--leaf-mid);color:var(--leaf)}
+.tool-btn.active{background:var(--leaf-mid);color:#fff;border-color:var(--leaf)}
+.tool-sep{width:1px;height:24px;background:var(--fog);flex-shrink:0}
+.grid-size-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.grid-ctrl-label{font-size:11px;color:var(--ink-pale)}
+.grid-ctrl-input{width:50px;border:1px solid var(--fog);border-radius:5px;padding:4px 8px;font-size:12px;font-family:'DM Sans',sans-serif;background:var(--parchment);color:var(--ink);text-align:center;outline:none}
+.grid-ctrl-input:focus{border-color:var(--leaf-mid)}
+.draw-canvas-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--fog);border-radius:8px;background:var(--parchment);padding:6px;position:relative}
+.draw-canvas{display:grid;gap:2px;user-select:none;touch-action:none;cursor:crosshair}
+.dcell{border-radius:3px;border:1px solid transparent;transition:background .08s,border-color .08s;position:relative}
+.dcell.empty{background:rgba(0,0,0,.04);border-color:var(--fog)}
+.dcell.filled{background:var(--leaf-mid);border-color:var(--leaf)}
+.dcell.preview-fill{background:rgba(74,124,35,.35);border-color:var(--leaf-mid)}
+.dcell.preview-erase{background:rgba(196,97,42,.2);border-color:var(--terracotta)}
+.dcell:hover.empty{background:rgba(74,124,35,.15);border-color:var(--leaf-mid)}
+.dcell:hover.filled{background:var(--leaf);border-color:var(--leaf)}
+.canvas-hint{font-size:10px;color:var(--ink-pale);text-align:center;margin-top:4px}
+.silhouette-canvas{display:block;margin-top:6px;border-radius:6px}
+.bed-stats{display:flex;gap:1.25rem;flex-wrap:wrap;margin-top:.75rem}
+.bed-stat{display:flex;flex-direction:column;gap:1px}
+.bed-stat-val{font-size:18px;font-weight:500;color:var(--ink);font-family:'Playfair Display',serif;line-height:1.2}
+.bed-stat-lbl{font-size:10px;color:var(--ink-pale);text-transform:uppercase;letter-spacing:.06em}
+.sun-selector{display:flex;gap:5px;margin-top:.4rem;flex-wrap:wrap}
+.sun-opt{padding:5px 11px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--fog);background:transparent;color:var(--ink-light);font-family:'DM Sans',sans-serif;transition:all .15s}
+.sun-opt.active{background:var(--sun);color:var(--soil);border-color:var(--sun);font-weight:500}
+.shape-presets{display:flex;gap:5px;flex-wrap:wrap;margin-top:.4rem}
+.preset-btn{padding:4px 10px;border:1px solid var(--fog);border-radius:5px;font-size:10px;cursor:pointer;background:transparent;color:var(--ink-light);font-family:'DM Sans',sans-serif;transition:all .12s}
+.preset-btn:hover{border-color:var(--leaf-mid);color:var(--leaf);background:rgba(74,124,35,.06)}
+
+/* BED LIST */
+.beds-list{display:flex;flex-direction:column;gap:.75rem;margin-top:1rem}
+.bed-card{background:var(--parchment);border:1px solid var(--fog);border-radius:10px;padding:.9rem 1rem;display:flex;align-items:center;gap:12px}
+.bed-card-icon{width:36px;height:36px;background:var(--soil);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bed-card-icon svg{opacity:.7}
+.bed-card-body{flex:1;min-width:0}
+.bed-card-name{font-size:13px;font-weight:500;color:var(--ink)}
+.bed-card-meta{font-size:11px;color:var(--ink-pale);margin-top:1px}
+.bed-card-actions{display:flex;gap:6px}
+
+/* PLANT LIBRARY */
+.plant-library-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;margin-top:.75rem}
+.plant-lib-card{background:var(--parchment);border:1px solid var(--fog);border-radius:9px;padding:.75rem;display:flex;align-items:center;gap:10px}
+.plant-lib-swatch{width:28px;height:28px;border-radius:6px;flex-shrink:0}
+.plant-lib-body{flex:1;min-width:0}
+.plant-lib-name{font-size:12px;font-weight:500;color:var(--ink)}
+.plant-lib-meta{font-size:10px;color:var(--ink-pale);margin-top:1px}
+.plant-lib-badge{font-size:9px;padding:1px 6px;border-radius:6px;background:rgba(45,80,22,.1);color:var(--leaf);display:inline-block}
+.plant-lib-custom{font-size:9px;padding:1px 6px;border-radius:6px;background:rgba(196,97,42,.1);color:var(--terracotta);display:inline-block;margin-left:4px}
+
+/* ADD PLANT MODAL */
+.modal-backdrop{position:fixed;inset:0;background:rgba(26,18,8,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-backdrop.hidden{display:none}
+.modal{background:var(--cream);border-radius:14px;padding:1.5rem;max-width:520px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--ink)}
+.modal-close{background:none;border:none;cursor:pointer;font-size:20px;color:var(--ink-pale);line-height:1;padding:2px 6px}
+.modal-close:hover{color:var(--ink)}
+.color-swatches{display:flex;flex-wrap:wrap;gap:6px;margin-top:.4rem}
+.color-swatch-opt{width:28px;height:28px;border-radius:5px;cursor:pointer;border:2px solid transparent;transition:all .12s}
+.color-swatch-opt.selected{border-color:var(--ink);transform:scale(1.1)}
+.companion-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:.4rem}
+.ctag{font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(45,80,22,.1);color:var(--leaf);cursor:pointer;border:1px solid transparent}
+.ctag:hover{border-color:var(--leaf-mid)}
+.ctag.selected{background:var(--leaf-mid);color:#fff}
+.ctag.avoid-tag.selected{background:var(--terracotta);color:#fff}
+.ctag.avoid-tag{background:rgba(196,97,42,.1);color:var(--terracotta)}
+
+/* EXPORT/IMPORT */
+.data-panel{background:var(--parchment);border-radius:9px;padding:1rem;margin-top:1rem}
+.data-panel-title{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:.5rem}
+.data-textarea{width:100%;border:1px solid var(--fog);border-radius:6px;padding:8px;font-size:11px;font-family:monospace;background:var(--cream);color:var(--ink);resize:vertical;min-height:80px;outline:none}
+.data-textarea:focus{border-color:var(--leaf-mid)}
+
+/* TOAST */
+#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--soil);color:var(--cream);padding:10px 20px;border-radius:30px;font-size:12px;font-family:'DM Sans',sans-serif;z-index:300;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
+
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .bed-builder{flex-direction:column}
+  .bcell{width:38px;height:38px}
+}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="modal-backdrop hidden" id="plant-modal">
+  <div class="modal" id="plant-modal-inner"></div>
+</div>
+
+<nav>
+  <div class="nav-logo">Garden Admin</div>
+  <span class="nav-save-indicator" id="save-indicator">Saved</span>
+  <a href="stpete_garden.html" class="nav-back">← Back to garden</a>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-eyebrow">Configuration</div>
+    <div class="page-title">Set up your garden</div>
+    <div class="page-desc">Configure your growing zone, build custom beds, and manage your plant library. Everything saves automatically and syncs with your garden planner.</div>
+  </div>
+
+  <!-- SECTION 1: ZONE -->
+  <div class="section" id="zone-section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <div class="section-title">Zone & location</div>
+        <div class="section-desc">Your climate profile drives the calendar and planting recommendations</div>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Zip code</label>
+        <input type="text" class="form-input" id="zip" placeholder="e.g. 33701" maxlength="5" inputmode="numeric">
+        <span class="form-hint">Enter your zip to auto-detect zone</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">USDA hardiness zone</label>
+        <select class="form-select" id="usda-zone">
+          <option value="">Select zone…</option>
+          <option value="8a">8a (10°F to 15°F)</option>
+          <option value="8b">8b (15°F to 20°F)</option>
+          <option value="9a">9a (20°F to 25°F)</option>
+          <option value="9b">9b (25°F to 30°F)</option>
+          <option value="10a" selected>10a (30°F to 35°F)</option>
+          <option value="10b">10b (35°F to 40°F)</option>
+          <option value="11a">11a (40°F to 45°F)</option>
+          <option value="11b">11b (45°F to 50°F)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">City / region</label>
+        <input type="text" class="form-input" id="city" placeholder="e.g. Saint Petersburg, FL">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Average last frost</label>
+        <input type="text" class="form-input" id="last-frost" placeholder="e.g. Jan 28">
+        <span class="form-hint">Average date — used for cool-season planning</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Average first frost (fall)</label>
+        <input type="text" class="form-input" id="first-frost" placeholder="e.g. Dec 15">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rainy season</label>
+        <div class="form-row" style="gap:8px;margin-top:2px">
+          <input type="text" class="form-input" id="rainy-start" placeholder="Start (e.g. Jun 1)" style="flex:1">
+          <input type="text" class="form-input" id="rainy-end" placeholder="End (e.g. Sep 30)" style="flex:1">
+        </div>
+      </div>
+    </div>
+    <div id="zone-detected" style="margin-top:1rem"></div>
+    <div class="form-grid" style="margin-top:1rem">
+      <div class="form-group">
+        <label class="form-label">Cool season window</label>
+        <div class="form-row" style="gap:8px;margin-top:2px">
+          <input type="text" class="form-input" id="cool-start" placeholder="Oct" style="flex:1">
+          <input type="text" class="form-input" id="cool-end" placeholder="Mar" style="flex:1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Warm season window</label>
+        <div class="form-row" style="gap:8px;margin-top:2px">
+          <input type="text" class="form-input" id="warm-start" placeholder="Mar" style="flex:1">
+          <input type="text" class="form-input" id="warm-end" placeholder="Sep" style="flex:1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Summer dormancy months</label>
+        <input type="text" class="form-input" id="dormancy" placeholder="e.g. Jun, Jul, Aug">
+        <span class="form-hint">Months when most cool-season crops bolt</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: BED BUILDER -->
+  <div class="section" id="beds-section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <div class="section-title">Bed builder</div>
+        <div class="section-desc">Tap cells to draw your bed shape, then save it to your garden</div>
+      </div>
+    </div>
+
+    <div class="bed-builder-wrap">
+      <!-- LEFT CONTROLS -->
+      <div class="builder-controls">
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label class="form-label">Bed name</label>
+          <input type="text" class="form-input" id="bed-name" placeholder="e.g. Bed E — west fence">
+        </div>
+
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label class="form-label">Grid size</label>
+          <div class="grid-size-row">
+            <span class="grid-ctrl-label">Cols</span>
+            <input type="number" class="grid-ctrl-input" id="grid-cols" value="8" min="1" max="24">
+            <span class="grid-ctrl-label">Rows</span>
+            <input type="number" class="grid-ctrl-input" id="grid-rows" value="5" min="1" max="16">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label class="form-label">Grid unit</label>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+            <div style="width:32px;height:32px;background:var(--leaf-mid);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="white" stroke-width="1.2"/><path d="M2 8h12M8 2v12" stroke="white" stroke-width="0.8" stroke-dasharray="2 1.5"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--ink)">1 square foot per cell</div>
+              <div style="font-size:11px;color:var(--ink-pale)">Each filled cell = 1 ft × 1 ft of growing space</div>
+            </div>
+          </div>
+          <input type="hidden" id="cell-size" value="1">
+        </div>
+
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label class="form-label">Bed depth</label>
+          <select class="form-select" id="bed-depth">
+            <option value="6">6 inches</option>
+            <option value="12">12 inches</option>
+            <option value="18" selected>18 inches</option>
+            <option value="24">24 inches</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label class="form-label">Sun exposure</label>
+          <div class="sun-selector" id="sun-selector">
+            <button class="sun-opt active" data-sun="full" onclick="setSun(this,'full')">Full (6+ hrs)</button>
+            <button class="sun-opt" data-sun="part" onclick="setSun(this,'part')">Part (4–6)</button>
+            <button class="sun-opt" data-sun="shade" onclick="setSun(this,'shade')">Shade</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label class="form-label">Orientation</label>
+          <select class="form-select" id="bed-orientation">
+            <option value="S">South-facing (most sun)</option>
+            <option value="E">East-facing (AM sun)</option>
+            <option value="W">West-facing (PM sun)</option>
+            <option value="N">North-facing (least sun)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label class="form-label">Start from a shape</label>
+          <div style="font-size:11px;color:var(--ink-pale);margin-bottom:6px">Each shape auto-sizes to your grid. Tap cells to customize after.</div>
+          <div class="shape-presets">
+            <button class="preset-btn" onclick="applyPreset('rect')">⬜ Rectangle</button>
+            <button class="preset-btn" onclick="applyPreset('E')">E-shape</button>
+            <button class="preset-btn" onclick="applyPreset('L')">L-shape</button>
+            <button class="preset-btn" onclick="applyPreset('U')">U-shape</button>
+            <button class="preset-btn" onclick="applyPreset('T')">T-shape</button>
+            <button class="preset-btn" onclick="applyPreset('cross')">+ Cross</button>
+            <button class="preset-btn" onclick="applyPreset('clear')">Clear</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:.85rem">
+          <label class="form-label">Circle bed generator</label>
+          <div style="font-size:11px;color:var(--ink-pale);margin-bottom:6px">Draws the closest sq ft approximation of a circle — like your 41 in round bed.</div>
+          <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+            <div style="flex:1;min-width:120px">
+              <div style="font-size:10px;color:var(--ink-pale);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">Diameter (feet)</div>
+              <input type="number" class="form-input" id="circle-diameter" value="4" min="1" max="20" step="0.5" style="text-align:center">
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="applyCirclePreset()" style="flex-shrink:0;margin-bottom:1px">Generate circle</button>
+          </div>
+          <div id="circle-preview-stats" style="font-size:11px;color:var(--ink-pale);margin-top:5px"></div>
+        </div>
+
+        <div class="bed-stats" id="bed-stats-display">
+          <div class="bed-stat"><div class="bed-stat-val" id="stat-sqft">0</div><div class="bed-stat-lbl">Sq ft</div></div>
+          <div class="bed-stat"><div class="bed-stat-val" id="stat-cells">0</div><div class="bed-stat-lbl">Cells</div></div>
+          <div class="bed-stat"><div class="bed-stat-val" id="stat-dims">—</div><div class="bed-stat-lbl">Max dims</div></div>
+          <div class="bed-stat"><div class="bed-stat-val" id="stat-pct">0%</div><div class="bed-stat-lbl">Coverage</div></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: DRAWING CANVAS -->
+      <div class="builder-canvas-area">
+        <!-- TOOLBAR -->
+        <div class="builder-toolbar">
+          <button class="tool-btn active" id="tool-pencil" onclick="setTool('pencil')">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.5 1.5L11.5 3.5L4 11H2V9L9.5 1.5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Draw
+          </button>
+          <button class="tool-btn" id="tool-rect" onclick="setTool('rect')">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="2" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>Rectangle
+          </button>
+          <button class="tool-btn" id="tool-fill" onclick="setTool('fill')">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 11L6 2L10 11" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M3.5 8h5" stroke="currentColor" stroke-width="1.2"/><circle cx="10.5" cy="11" r="1.5" fill="currentColor"/></svg>Fill
+          </button>
+          <button class="tool-btn" id="tool-eraser" onclick="setTool('eraser')">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 11L8.5 2L12 5.5L5.5 11H2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Erase
+          </button>
+          <div class="tool-sep"></div>
+          <button class="tool-btn" onclick="undoAction()" id="undo-btn" title="Undo">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6C2 3.8 3.8 2 6 2C8.2 2 10 3.8 10 6C10 8.2 8.2 10 6 10H4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M2 4V6H4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Undo
+          </button>
+          <button class="tool-btn" onclick="applyPreset('clear')">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2L11 11M11 2L2 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Clear
+          </button>
+        </div>
+
+        <div class="draw-canvas-wrap">
+          <div class="draw-canvas" id="draw-canvas"></div>
+        </div>
+        <div class="canvas-hint" id="canvas-hint">Draw mode · click and drag to paint bed cells</div>
+
+        <!-- SILHOUETTE PREVIEW -->
+        <div style="font-size:10px;color:var(--ink-pale);letter-spacing:.06em;text-transform:uppercase;margin-top:4px">Shape preview</div>
+        <canvas id="silhouette-canvas" class="silhouette-canvas" width="320" height="120"></canvas>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveBed()">Save bed to garden</button>
+    </div>
+
+    <!-- SAVED BEDS LIST -->
+    <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--fog)">
+      <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:.25rem">Your beds</div>
+      <div style="font-size:12px;color:var(--ink-pale);margin-bottom:.75rem">All beds saved in your garden. Click edit to load into the builder.</div>
+      <div class="beds-list" id="beds-list"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: PLANT LIBRARY -->
+  <div class="section" id="plants-section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <div class="section-title">Plant library</div>
+        <div class="section-desc">Browse built-in plants and add your own custom varieties</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input type="text" class="form-input" id="plant-search" placeholder="Search plants…" style="max-width:220px" oninput="renderPlantLibrary()">
+      <select class="form-select" id="plant-filter" style="max-width:160px" onchange="renderPlantLibrary()">
+        <option value="all">All plants</option>
+        <option value="custom">Custom only</option>
+        <option value="builtin">Built-in only</option>
+        <option value="cool">Cool season</option>
+        <option value="warm">Warm season</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="openAddPlantModal()">+ Add custom plant</button>
+    </div>
+    <div class="plant-library-grid" id="plant-library-grid"></div>
+  </div>
+
+  <!-- SECTION 4: EXPORT / IMPORT / RESET -->
+  <div class="section" id="data-section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <div class="section-title">Data & sharing</div>
+        <div class="section-desc">Export your full garden config as JSON to back up or share with a friend</div>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div>
+        <div class="data-panel">
+          <div class="data-panel-title">Export your config</div>
+          <p style="font-size:12px;color:var(--ink-pale);margin-bottom:.75rem">Copy this JSON and save it, or share with a friend so they can import it on their own copy of the garden planner.</p>
+          <button class="btn btn-secondary btn-sm" onclick="exportConfig()" style="margin-bottom:.75rem">Generate export JSON</button>
+          <textarea class="data-textarea" id="export-text" placeholder="Click Generate to create export JSON…" readonly></textarea>
+        </div>
+      </div>
+      <div>
+        <div class="data-panel">
+          <div class="data-panel-title">Import a config</div>
+          <p style="font-size:12px;color:var(--ink-pale);margin-bottom:.75rem">Paste a JSON config from a friend or your own backup. This will overwrite your current beds and custom plants.</p>
+          <textarea class="data-textarea" id="import-text" placeholder="Paste JSON config here…"></textarea>
+          <button class="btn btn-primary btn-sm" onclick="importConfig()" style="margin-top:.5rem">Import & apply</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--fog);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:12px;color:var(--ink-pale)">Danger zone:</span>
+      <button class="btn btn-danger btn-sm" onclick="resetAllData()">Reset all garden data</button>
+      <button class="btn btn-danger btn-sm" onclick="clearCustomPlants()">Remove all custom plants</button>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:center;margin-top:2rem">
+    <a href="stpete_garden.html" class="btn btn-primary" style="text-decoration:none;font-size:14px;padding:12px 32px">Go to garden planner →</a>
+  </div>
+</div>
+
+<script>
+if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=Math.min(r,w/2,h/2);this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.arcTo(x+w,y,x+w,y+r,r);this.lineTo(x+w,y+h-r);this.arcTo(x+w,y+h,x+w-r,y+h,r);this.lineTo(x+r,y+h);this.arcTo(x,y+h,x,y+h-r,r);this.lineTo(x,y+r);this.arcTo(x,y,x+r,y,r);this.closePath();return this;};}
+/* ═══ STORAGE KEYS ═══ */
+const ZONE_KEY    = 'garden_zone_v1';
+const BEDS_KEY    = 'garden_beds_v2';
+const PLANTS_KEY  = 'garden_custom_plants_v1';
+const LAYOUT_KEY  = 'garden_layouts_v2';
+
+/* ═══ SAVE INDICATOR ═══ */
+let saveTimer;
+function flashSaved() {
+  const el = document.getElementById('save-indicator');
+  el.classList.add('show');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function showToast(msg) {
+  toast(msg);
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ═══ ZONE ═══ */
+const ZONE_DEFAULTS = {
+  zip:'33701', usdaZone:'10a', city:'Saint Petersburg, FL',
+  lastFrost:'Jan 28', firstFrost:'Dec 15',
+  rainyStart:'Jun 1', rainyEnd:'Sep 30',
+  coolStart:'Oct', coolEnd:'Mar',
+  warmStart:'Mar', warmEnd:'Sep',
+  dormancy:'Jun, Jul, Aug',
+};
+
+function loadZone() {
+  const z = JSON.parse(localStorage.getItem(ZONE_KEY) || JSON.stringify(ZONE_DEFAULTS));
+  document.getElementById('zip').value = z.zip || '';
+  document.getElementById('usda-zone').value = z.usdaZone || '10a';
+  document.getElementById('city').value = z.city || '';
+  document.getElementById('last-frost').value = z.lastFrost || '';
+  document.getElementById('first-frost').value = z.firstFrost || '';
+  document.getElementById('rainy-start').value = z.rainyStart || '';
+  document.getElementById('rainy-end').value = z.rainyEnd || '';
+  document.getElementById('cool-start').value = z.coolStart || '';
+  document.getElementById('cool-end').value = z.coolEnd || '';
+  document.getElementById('warm-start').value = z.warmStart || '';
+  document.getElementById('warm-end').value = z.warmEnd || '';
+  document.getElementById('dormancy').value = z.dormancy || '';
+  updateZoneBadge(z.usdaZone || '10a');
+}
+
+function saveZone() {
+  const z = {
+    zip: document.getElementById('zip').value,
+    usdaZone: document.getElementById('usda-zone').value,
+    city: document.getElementById('city').value,
+    lastFrost: document.getElementById('last-frost').value,
+    firstFrost: document.getElementById('first-frost').value,
+    rainyStart: document.getElementById('rainy-start').value,
+    rainyEnd: document.getElementById('rainy-end').value,
+    coolStart: document.getElementById('cool-start').value,
+    coolEnd: document.getElementById('cool-end').value,
+    warmStart: document.getElementById('warm-start').value,
+    warmEnd: document.getElementById('warm-end').value,
+    dormancy: document.getElementById('dormancy').value,
+  };
+  localStorage.setItem(ZONE_KEY, JSON.stringify(z));
+  flashSaved();
+  updateZoneBadge(z.usdaZone);
+}
+
+function updateZoneBadge(zone) {
+  document.getElementById('zone-detected').innerHTML = zone
+    ? `<div class="zone-badge"><span class="zone-num">${zone}</span><span>USDA hardiness zone</span></div>`
+    : '';
+}
+
+// Auto-detect zone from zip (simplified FL zip lookup)
+document.getElementById('zip').addEventListener('input', function() {
+  const zip = this.value;
+  if (zip.length === 5) {
+    const z10a = ['33601','33602','33603','33604','33605','33606','33607','33608','33609','33610','33611','33612','33613','33614','33615','33616','33617','33618','33619','33620','33621','33622','33624','33625','33626','33629','33634','33635','33637','33647','33701','33702','33703','33704','33705','33706','33707','33708','33709','33710','33711','33712','33713','33714','33715','33716','33755','33756','33759','33760','33761','33762','33763','33764','33765','33766','33767','33770','33771','33772','33773','33774','33775','33776','33777','33778','33781','33782','33785','33786'];
+    if (z10a.some(z => z.startsWith(zip.slice(0,3)))) {
+      document.getElementById('usda-zone').value = '10a';
+      document.getElementById('city').value = document.getElementById('city').value || 'Saint Petersburg, FL';
+      updateZoneBadge('10a');
+    }
+    saveZone();
+  }
+});
+
+document.querySelectorAll('#zone-section input, #zone-section select').forEach(el => {
+  el.addEventListener('change', saveZone);
+  el.addEventListener('blur', saveZone);
+});
+
+/* ═══ BED BUILDER ═══ */
+let builderGrid   = [];   // flat bool array, true=filled
+let undoStack     = [];   // array of snapshots for undo
+let currentTool   = 'pencil';
+let isDragging    = false;
+let dragStart     = null; // {r,c} for rect tool
+let editingBedId  = null;
+let activeSun     = 'full';
+
+/* ─── Tool selection ─── */
+function setTool(tool) {
+  currentTool = tool;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('tool-'+tool);
+  if (btn) btn.classList.add('active');
+  const hints = {
+    pencil:  'Draw mode — click and drag to paint · each cell = 1 sq ft',
+    rect:    'Rectangle fill — drag corner to corner to fill a box of sq ft cells',
+    fill:    'Bucket fill — click any empty area to fill it, or any filled area to clear it',
+    eraser:  'Eraser — click and drag to remove cells from your bed',
+  };
+  const hintEl = document.getElementById('canvas-hint');
+  if (hintEl) hintEl.textContent = hints[tool] || '';
+  clearPreview();
+}
+
+function setSun(btn, val) {
+  activeSun = val;
+  document.querySelectorAll('.sun-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+/* ─── Grid dimensions ─── */
+function getBuilderDims() {
+  const cols = Math.max(1, Math.min(24, parseInt(document.getElementById('grid-cols').value)||8));
+  const rows = Math.max(1, Math.min(16, parseInt(document.getElementById('grid-rows').value)||5));
+  return {cols, rows};
+}
+
+/* ─── Initialize / resize grid ─── */
+function initBuilderGrid(keepData) {
+  const {cols, rows} = getBuilderDims();
+  const total = cols * rows;
+  if (!keepData || builderGrid.length !== total) {
+    // Preserve as much data as possible when resizing
+    const oldCols = keepData ? Math.round(Math.sqrt(builderGrid.length * (cols/rows))) : 0;
+    const newGrid = new Array(total).fill(false);
+    if (keepData && builderGrid.length > 0 && oldCols > 0) {
+      const oldRows = Math.ceil(builderGrid.length / oldCols);
+      for (let r = 0; r < Math.min(rows, oldRows); r++) {
+        for (let c = 0; c < Math.min(cols, oldCols); c++) {
+          newGrid[r*cols+c] = builderGrid[r*oldCols+c] || false;
+        }
+      }
+    }
+    builderGrid = newGrid;
+  }
+  renderDrawCanvas();
+  updateStats();
+  renderSilhouette();
+}
+
+/* ─── Draw canvas renderer ─── */
+function renderDrawCanvas() {
+  const {cols, rows} = getBuilderDims();
+  const canvas = document.getElementById('draw-canvas');
+  if (!canvas) return;
+  // Responsive cell size
+  const maxW = Math.min(window.innerWidth - 80, 600);
+  const cellPx = Math.max(28, Math.min(46, Math.floor((maxW - cols*2) / cols)));
+  canvas.style.gridTemplateColumns = `repeat(${cols}, ${cellPx}px)`;
+  canvas.innerHTML = '';
+
+  builderGrid.forEach((filled, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'dcell ' + (filled ? 'filled' : 'empty');
+    cell.style.width = cellPx+'px';
+    cell.style.height = cellPx+'px';
+    cell.dataset.idx = i;
+
+    // Mouse events
+    cell.addEventListener('mousedown', e => { e.preventDefault(); handleCellDown(i); });
+    cell.addEventListener('mouseenter', () => { if (isDragging) handleCellDrag(i); else handleCellHover(i); });
+    cell.addEventListener('mouseleave', () => handleCellLeave(i));
+
+    canvas.appendChild(cell);
+  });
+
+  // Canvas-level mouse events
+  canvas.addEventListener('mousedown', e => { isDragging = true; });
+  canvas.addEventListener('mouseup',   e => { handleDragEnd(); isDragging = false; });
+  canvas.addEventListener('mouseleave', e => { if (isDragging) { handleDragEnd(); isDragging = false; } });
+
+  // Touch events
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    isDragging = true;
+    const t = e.touches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if (el && el.dataset.idx != null) handleCellDown(parseInt(el.dataset.idx));
+  }, {passive:false});
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if (el && el.dataset.idx != null && isDragging) handleCellDrag(parseInt(el.dataset.idx));
+  }, {passive:false});
+  canvas.addEventListener('touchend', e => { handleDragEnd(); isDragging = false; });
+}
+
+/* ─── Cell interaction handlers ─── */
+function handleCellDown(idx) {
+  pushUndo();
+  const {cols} = getBuilderDims();
+  const r = Math.floor(idx/cols), c = idx%cols;
+  dragStart = {r, c, idx};
+
+  if (currentTool === 'pencil') {
+    builderGrid[idx] = true;
+    updateCell(idx);
+  } else if (currentTool === 'eraser') {
+    builderGrid[idx] = false;
+    updateCell(idx);
+  } else if (currentTool === 'fill') {
+    floodFill(idx, !builderGrid[idx]);
+    updateStats(); renderDrawCanvas(); renderSilhouette();
+  } else if (currentTool === 'rect') {
+    // Start rect preview
+  }
+  updateStats();
+  renderSilhouette();
+}
+
+function handleCellDrag(idx) {
+  if (!isDragging) return;
+  const {cols} = getBuilderDims();
+  const r = Math.floor(idx/cols), c = idx%cols;
+
+  if (currentTool === 'pencil') {
+    builderGrid[idx] = true;
+    updateCell(idx);
+    updateStats(); renderSilhouette();
+  } else if (currentTool === 'eraser') {
+    builderGrid[idx] = false;
+    updateCell(idx);
+    updateStats(); renderSilhouette();
+  } else if (currentTool === 'rect' && dragStart) {
+    // Show preview
+    showRectPreview(dragStart.r, dragStart.c, r, c);
+  }
+}
+
+function handleCellHover(idx) {
+  // Hover highlight handled by CSS only (no state needed)
+}
+function handleCellLeave(idx) {}
+
+function handleDragEnd() {
+  if (currentTool === 'rect' && dragStart) {
+    const {cols} = getBuilderDims();
+    const canvas = document.getElementById('draw-canvas');
+    // Apply the preview as real fills
+    if (canvas) {
+      canvas.querySelectorAll('.dcell.preview-fill').forEach(el => {
+        const i = parseInt(el.dataset.idx);
+        builderGrid[i] = true;
+        el.className = 'dcell filled';
+      });
+      canvas.querySelectorAll('.dcell.preview-erase').forEach(el => {
+        const i = parseInt(el.dataset.idx);
+        builderGrid[i] = false;
+        el.className = 'dcell empty';
+      });
+    }
+    dragStart = null;
+    updateStats(); renderSilhouette();
+  }
+}
+
+/* ─── Rectangle preview ─── */
+function showRectPreview(r1, c1, r2, c2) {
+  const {cols} = getBuilderDims();
+  clearPreview();
+  const minR = Math.min(r1,r2), maxR = Math.max(r1,r2);
+  const minC = Math.min(c1,c2), maxC = Math.max(c1,c2);
+  const canvas = document.getElementById('draw-canvas');
+  if (!canvas) return;
+  for (let r = minR; r <= maxR; r++) {
+    for (let c = minC; c <= maxC; c++) {
+      const el = canvas.querySelector(`[data-idx="${r*cols+c}"]`);
+      if (el) {
+        const willFill = !builderGrid[r*cols+c];
+        el.classList.add(willFill ? 'preview-fill' : 'preview-erase');
+      }
+    }
+  }
+}
+
+function clearPreview() {
+  const canvas = document.getElementById('draw-canvas');
+  if (!canvas) return;
+  canvas.querySelectorAll('.preview-fill,.preview-erase').forEach(el => {
+    el.classList.remove('preview-fill','preview-erase');
+  });
+}
+
+/* ─── Update a single cell DOM ─── */
+function updateCell(idx) {
+  const canvas = document.getElementById('draw-canvas');
+  if (!canvas) return;
+  const el = canvas.querySelector(`[data-idx="${idx}"]`);
+  if (el) el.className = 'dcell ' + (builderGrid[idx] ? 'filled' : 'empty');
+}
+
+/* ─── Flood fill (bucket tool) ─── */
+function floodFill(startIdx, fillValue) {
+  const {cols, rows} = getBuilderDims();
+  const targetValue = builderGrid[startIdx];
+  if (targetValue === fillValue) return;
+  const queue = [startIdx];
+  const visited = new Set([startIdx]);
+  while (queue.length) {
+    const idx = queue.shift();
+    builderGrid[idx] = fillValue;
+    const r = Math.floor(idx/cols), c = idx%cols;
+    const neighbors = [];
+    if (r > 0)      neighbors.push((r-1)*cols+c);
+    if (r < rows-1) neighbors.push((r+1)*cols+c);
+    if (c > 0)      neighbors.push(r*cols+(c-1));
+    if (c < cols-1) neighbors.push(r*cols+(c+1));
+    neighbors.forEach(n => {
+      if (!visited.has(n) && builderGrid[n] === targetValue) {
+        visited.add(n); queue.push(n);
+      }
+    });
+  }
+}
+
+/* ─── Undo ─── */
+function pushUndo() {
+  undoStack.push([...builderGrid]);
+  if (undoStack.length > 30) undoStack.shift();
+}
+function undoAction() {
+  if (!undoStack.length) return;
+  builderGrid = undoStack.pop();
+  renderDrawCanvas(); updateStats(); renderSilhouette();
+}
+
+/* ─── Stats ─── */
+function updateStats() {
+  const {cols, rows} = getBuilderDims();
+  const cellSize = parseFloat(document.getElementById('cell-size')?.value) || 1;
+  const filled = builderGrid.filter(Boolean).length;
+  const total = cols * rows;
+  const sqft  = +(filled * cellSize * cellSize).toFixed(1);
+  const pct   = total > 0 ? Math.round(filled/total*100) : 0;
+
+  // Bounding box
+  let minR=rows,maxR=0,minC=cols,maxC=0;
+  builderGrid.forEach((v,i) => {
+    if (!v) return;
+    const r=Math.floor(i/cols),c=i%cols;
+    minR=Math.min(minR,r);maxR=Math.max(maxR,r);
+    minC=Math.min(minC,c);maxC=Math.max(maxC,c);
+  });
+  const bboxW = filled>0 ? (maxC-minC+1)*cellSize : 0;
+  const bboxH = filled>0 ? (maxR-minR+1)*cellSize : 0;
+
+  const el = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+  el('stat-sqft',  sqft);
+  el('stat-cells', filled);
+  el('stat-dims',  filled>0 ? `${bboxW}×${bboxH} ft` : '—');
+  el('stat-pct',   pct+'%');
+}
+
+/* ─── Silhouette preview canvas ─── */
+function renderSilhouette() {
+  const cv = document.getElementById('silhouette-canvas');
+  if (!cv) return;
+  const {cols, rows} = getBuilderDims();
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Background
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--parchment').trim() || '#f0e8d8';
+  ctx.fillRect(0,0,W,H);
+
+  if (!builderGrid.some(Boolean)) {
+    ctx.fillStyle = '#a08060';
+    ctx.font = '12px DM Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Draw cells above to see shape preview', W/2, H/2);
+    return;
+  }
+
+  // Find bounding box
+  let minR=rows,maxR=0,minC=cols,maxC=0;
+  builderGrid.forEach((v,i) => {
+    if (!v) return;
+    const r=Math.floor(i/cols),c=i%cols;
+    minR=Math.min(minR,r);maxR=Math.max(maxR,r);
+    minC=Math.min(minC,c);maxC=Math.max(maxC,c);
+  });
+  const bboxW = maxC-minC+1, bboxH = maxR-minR+1;
+  const pad = 12;
+  const cellW = (W - pad*2) / bboxW;
+  const cellH = (H - pad*2) / bboxH;
+  const cs    = Math.min(cellW, cellH, 28);
+  const offX  = (W - cs*bboxW) / 2;
+  const offY  = (H - cs*bboxH) / 2;
+
+  // Shadow pass
+  ctx.fillStyle = 'rgba(0,0,0,0.06)';
+  builderGrid.forEach((v,i) => {
+    if (!v) return;
+    const r=Math.floor(i/cols)-minR, c=i%cols-minC;
+    ctx.fillRect(offX+c*cs+2, offY+r*cs+2, cs-2, cs-2);
+  });
+
+  // Fill pass
+  const leafMid = '#4a7c23';
+  const leafDark = '#2d5016';
+  builderGrid.forEach((v,i) => {
+    if (!v) return;
+    const r=Math.floor(i/cols)-minR, c=i%cols-minC;
+    const x=offX+c*cs, y=offY+r*cs;
+    ctx.fillStyle = leafMid;
+    ctx.beginPath();
+    ctx.roundRect(x+1,y+1,cs-2,cs-2,2);
+    ctx.fill();
+    // Top highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.fillRect(x+2,y+2,cs-4,3);
+  });
+
+  // Grid lines pass (only on filled cells)
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 0.5;
+  builderGrid.forEach((v,i) => {
+    if (!v) return;
+    const r=Math.floor(i/cols)-minR, c=i%cols-minC;
+    const x=offX+c*cs+1, y=offY+r*cs+1;
+    ctx.strokeRect(x,y,cs-2,cs-2);
+  });
+
+  // Dimensions + sqft label
+  const filled2 = builderGrid.filter(Boolean).length;
+  ctx.fillStyle = '#a08060';
+  ctx.font = '10px DM Sans, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(`${bboxW} ft × ${bboxH} ft  ·  ${filled2} sq ft total`, W/2, H-2);
+}
+
+/* ─── Shape presets ─── */
+function applyPreset(shape) {
+  pushUndo();
+  const {cols, rows} = getBuilderDims();
+  builderGrid = new Array(cols*rows).fill(false);
+
+  if (shape === 'clear') {
+    // already cleared above
+  } else if (shape === 'rect') {
+    builderGrid = new Array(cols*rows).fill(true);
+  } else if (shape === 'E') {
+    document.getElementById('grid-cols').value = 20;
+    document.getElementById('grid-rows').value = 4;
+    const c=20,r=4;
+    builderGrid = [];
+    for (let ri=0;ri<r;ri++) for (let ci=0;ci<c;ci++) {
+      builderGrid.push(ri<=1||(ci<=3)||(ci>=8&&ci<=11)||(ci>=16&&ci<=19));
+    }
+  } else if (shape === 'L') {
+    // Fill bottom row + left column
+    for (let r=0;r<rows;r++) for (let c=0;c<cols;c++) {
+      builderGrid[r*cols+c] = (c===0 || r===rows-1);
+    }
+  } else if (shape === 'U') {
+    // Left col + bottom row + right col
+    for (let r=0;r<rows;r++) for (let c=0;c<cols;c++) {
+      builderGrid[r*cols+c] = (c===0 || c===cols-1 || r===rows-1);
+    }
+  } else if (shape === 'T') {
+    // Top row + center column
+    const midC = Math.floor(cols/2);
+    for (let r=0;r<rows;r++) for (let c=0;c<cols;c++) {
+      builderGrid[r*cols+c] = (r===0 || c===midC || c===midC-1);
+    }
+  } else if (shape === 'cross') {
+    const midC=Math.floor(cols/2), midR=Math.floor(rows/2);
+    for (let r=0;r<rows;r++) for (let c=0;c<cols;c++) {
+      builderGrid[r*cols+c] = (r===midR || r===midR-1 || c===midC || c===midC-1);
+    }
+  } else if (shape === 'triangle') {
+    for (let r=0;r<rows;r++) {
+      const w = Math.ceil((rows-r) * cols / rows);
+      const start = Math.floor((cols-w)/2);
+      for (let c=0;c<cols;c++) builderGrid[r*cols+c] = (c>=start && c<start+w);
+    }
+  }
+
+  renderDrawCanvas(); updateStats(); renderSilhouette();
+  if (shape==='E') {
+    document.getElementById('bed-name').value='Bed D — E-shape';
+    document.getElementById('cell-size').value='1';
+    setSun(document.querySelector('.sun-opt[data-sun="full"]'),'full');
+  }
+}
+
+/* ─── Circle bed generator ─── */
+function applyCirclePreset() {
+  const diamFt = parseFloat(document.getElementById('circle-diameter').value) || 4;
+  // Circle in sq ft cells: radius in cells = diameter/2
+  // We need a grid large enough to contain the circle
+  // Use ceiling of diameter + 1 for grid size
+  const gridSize = Math.max(Math.ceil(diamFt) + 1, 3);
+  const cols = gridSize, rows = gridSize;
+
+  // Resize grid
+  document.getElementById('grid-cols').value = cols;
+  document.getElementById('grid-rows').value = rows;
+
+  pushUndo();
+
+  // Centre of grid in fractional cell coords
+  const cx = (cols - 1) / 2;
+  const cy = (rows - 1) / 2;
+  const r  = diamFt / 2; // radius in feet = cells
+
+  const newGrid = [];
+  let filledCount = 0;
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      // Check if cell centre falls within circle
+      // Cell centre is at (col, row) in cell-coord space
+      const dx = col - cx;
+      const dy = row - cy;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const inside = dist <= r + 0.45; // +0.45 avoids harsh pixel edges at boundary
+      newGrid.push(inside);
+      if (inside) filledCount++;
+    }
+  }
+
+  builderGrid = newGrid;
+
+  // Update stats display
+  const actualArea = +(filledCount).toFixed(1); // 1:1 sqft
+  const idealArea  = +(Math.PI * r * r).toFixed(1);
+  const pct        = Math.round(filledCount / idealArea * 100);
+  const statsEl    = document.getElementById('circle-preview-stats');
+  if (statsEl) statsEl.textContent = `${filledCount} sq ft filled · ideal circle = ${idealArea} sq ft · ${pct}% accuracy`;
+
+  // Set a sensible bed name if empty
+  if (!document.getElementById('bed-name').value.trim()) {
+    document.getElementById('bed-name').value = `${diamFt} ft round bed`;
+  }
+
+  renderDrawCanvas(); updateStats(); renderSilhouette();
+  showToast(`Circle bed generated — ${filledCount} sq ft`);
+}
+
+function loadEShapePreset() { applyPreset('E'); }
+function loadRectPreset()   { applyPreset('rect'); }
+function resetBuilderGrid() { applyPreset('clear'); }
+
+/* ─── Save bed ─── */
+function saveBed() {
+  const name = document.getElementById('bed-name').value.trim();
+  if (!name) { showToast('Please enter a bed name'); return; }
+  const {cols, rows} = getBuilderDims();
+  const filled = builderGrid.filter(Boolean).length;
+  if (!filled) { showToast('Draw your bed shape first'); return; }
+
+  const cellSize = parseFloat(document.getElementById('cell-size').value)||1;
+  const beds = JSON.parse(localStorage.getItem(BEDS_KEY)||'[]');
+  const bed = {
+    id: editingBedId || ('bed_'+Date.now()),
+    name, cols, rows, cellSize,
+    depth:       parseInt(document.getElementById('bed-depth').value)||18,
+    sun:         activeSun,
+    orientation: document.getElementById('bed-orientation').value,
+    grid:        [...builderGrid],
+    sqft:        +(filled*cellSize*cellSize).toFixed(1),
+    createdAt:   editingBedId ? (beds.find(b=>b.id===editingBedId)?.createdAt||Date.now()) : Date.now(),
+  };
+  const idx = beds.findIndex(b=>b.id===bed.id);
+  if (idx>-1) beds[idx]=bed; else beds.push(bed);
+  localStorage.setItem(BEDS_KEY,JSON.stringify(beds));
+  editingBedId = null;
+  document.getElementById('bed-name').value='';
+  flashSaved();
+  showToast(`"${name}" saved`);
+  renderBedsList();
+}
+
+function editBed(bedId) {
+  const beds = JSON.parse(localStorage.getItem(BEDS_KEY)||'[]');
+  const bed  = beds.find(b=>b.id===bedId);
+  if (!bed) return;
+  editingBedId = bedId;
+  document.getElementById('bed-name').value       = bed.name;
+  document.getElementById('grid-cols').value       = bed.cols;
+  document.getElementById('grid-rows').value       = bed.rows;
+  document.getElementById('cell-size').value       = bed.cellSize||1;
+  document.getElementById('bed-depth').value       = bed.depth||18;
+  document.getElementById('bed-orientation').value = bed.orientation||'S';
+  activeSun = bed.sun||'full';
+  document.querySelectorAll('.sun-opt').forEach(b=>b.classList.toggle('active',b.dataset.sun===activeSun));
+  builderGrid = [...bed.grid];
+  renderDrawCanvas(); updateStats(); renderSilhouette();
+  document.getElementById('beds-section').scrollIntoView({behavior:'smooth'});
+  showToast(`Editing "${bed.name}"`);
+}
+
+function deleteBed(bedId) {
+  const beds = JSON.parse(localStorage.getItem(BEDS_KEY)||'[]');
+  const bed  = beds.find(b=>b.id===bedId);
+  if (!confirm(`Delete "${bed?.name}"?`)) return;
+  localStorage.setItem(BEDS_KEY,JSON.stringify(beds.filter(b=>b.id!==bedId)));
+  const layouts = JSON.parse(localStorage.getItem(LAYOUT_KEY)||'{}');
+  delete layouts[bedId];
+  localStorage.setItem(LAYOUT_KEY,JSON.stringify(layouts));
+  renderBedsList();
+  showToast(`"${bed?.name}" deleted`);
+}
+
+// resize handler
+window.addEventListener('resize', () => {
+  if (document.getElementById('draw-canvas')) renderDrawCanvas();
+  renderSilhouette();
+});
+
+// Grid size inputs trigger resize
+document.getElementById('grid-cols').addEventListener('input', () => initBuilderGrid(true));
+document.getElementById('grid-rows').addEventListener('input', () => initBuilderGrid(true));
+document.getElementById('cell-size').addEventListener('change', updateStats);
+
+/* ═══ PLANT LIBRARY ═══ */
+const BUILTIN_PLANTS = {
+  kale:{bg:'#27500A',label:'Kale',sqft:1,sun:'part',height:'medium',season:'cool'},
+  spinach:{bg:'#3B6D11',label:'Spinach',sqft:9,sun:'part',height:'short',season:'cool'},
+  arugula:{bg:'#639922',label:'Arugula',sqft:4,sun:'part',height:'short',season:'cool'},
+  carrot:{bg:'#993C1D',label:'Carrot',sqft:16,sun:'any',height:'short',season:'cool'},
+  onion:{bg:'#D85A30',label:'Onion',sqft:4,sun:'any',height:'short',season:'cool'},
+  garlic:{bg:'#712B13',label:'Garlic',sqft:4,sun:'any',height:'short',season:'cool'},
+  parsley:{bg:'#0F6E56',label:'Parsley',sqft:4,sun:'part',height:'short',season:'both'},
+  basil:{bg:'#085041',label:'Basil',sqft:1,sun:'full',height:'medium',season:'warm'},
+  cilantro:{bg:'#1D9E75',label:'Cilantro',sqft:9,sun:'part',height:'short',season:'cool'},
+  greenonion:{bg:'#5F5E5A',label:'Green onion',sqft:16,sun:'any',height:'short',season:'both'},
+  marigold:{bg:'#BA7517',label:'Marigold',sqft:2,sun:'full',height:'short',season:'both'},
+  tomato:{bg:'#A32D2D',label:'Tomato',sqft:1,sun:'full',height:'tall',season:'warm'},
+  pepper:{bg:'#534AB7',label:'Pepper',sqft:1,sun:'full',height:'medium',season:'warm'},
+  cantaloupe:{bg:'#EF9F27',label:'Cantaloupe',sqft:1,sun:'full',height:'tall',season:'warm'},
+  nasturtium:{bg:'#D85A30',label:'Nasturtium',sqft:2,sun:'part',height:'short',season:'both'},
+  borage:{bg:'#185FA5',label:'Borage',sqft:1,sun:'full',height:'medium',season:'warm'},
+  calendula:{bg:'#854F0B',label:'Calendula',sqft:2,sun:'part',height:'short',season:'cool'},
+  cabbage:{bg:'#173404',label:'Cabbage',sqft:1,sun:'any',height:'medium',season:'cool'},
+  lettuce:{bg:'#5a8a1a',label:'Lettuce',sqft:4,sun:'part',height:'short',season:'cool'},
+  radish:{bg:'#cc2244',label:'Radish',sqft:16,sun:'part',height:'short',season:'cool'},
+  chard:{bg:'#1a6b3a',label:'Chard',sqft:4,sun:'full',height:'medium',season:'both'},
+  beans:{bg:'#4a7020',label:'Beans',sqft:9,sun:'full',height:'tall',season:'warm'},
+  cucumber:{bg:'#3d7a2a',label:'Cucumber',sqft:2,sun:'full',height:'tall',season:'warm'},
+};
+
+const SWATCH_COLORS = [
+  '#27500A','#3B6D11','#639922','#7fb23a','#085041','#1D9E75','#0F6E56',
+  '#993C1D','#D85A30','#712B13','#A32D2D','#cc2244','#c4612a',
+  '#534AB7','#185FA5','#854F0B','#BA7517','#EF9F27','#5F5E5A',
+  '#1a6b3a','#4a7020','#3d7a2a','#5a8a1a','#173404',
+];
+
+function loadCustomPlants() {
+  return JSON.parse(localStorage.getItem(PLANTS_KEY) || '[]');
+}
+function saveCustomPlants(plants) {
+  localStorage.setItem(PLANTS_KEY, JSON.stringify(plants));
+  flashSaved();
+}
+
+function renderPlantLibrary() {
+  const search = document.getElementById('plant-search').value.toLowerCase();
+  const filter = document.getElementById('plant-filter').value;
+  const custom = loadCustomPlants();
+  const grid = document.getElementById('plant-library-grid');
+  grid.innerHTML = '';
+
+  const allPlants = [
+    ...custom.map(p => ({...p, isCustom:true})),
+    ...Object.entries(BUILTIN_PLANTS).map(([k,v]) => ({...v, key:k, isCustom:false})),
+  ];
+
+  const filtered = allPlants.filter(p => {
+    if (search && !p.label.toLowerCase().includes(search)) return false;
+    if (filter === 'custom' && !p.isCustom) return false;
+    if (filter === 'builtin' && p.isCustom) return false;
+    if (filter === 'cool' && p.season !== 'cool' && p.season !== 'both') return false;
+    if (filter === 'warm' && p.season !== 'warm' && p.season !== 'both') return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div style="font-size:12px;color:var(--ink-pale);padding:.5rem 0;grid-column:1/-1">No plants match your search.</div>';
+    return;
+  }
+
+  filtered.forEach(p => {
+    const card = document.createElement('div'); card.className='plant-lib-card';
+    const sqLabel = p.sqft > 1 ? `${p.sqft}/sq ft` : '1/sq ft';
+    card.innerHTML=`
+      <div class="plant-lib-swatch" style="background:${p.bg}"></div>
+      <div class="plant-lib-body">
+        <div class="plant-lib-name">${p.label}${p.isCustom?'<span class="plant-lib-custom">custom</span>':''}</div>
+        <div class="plant-lib-meta">${sqLabel} · ${p.sun||'any'} sun · ${p.season||'both'}</div>
+        <div style="margin-top:3px"><span class="plant-lib-badge">${p.height||'medium'}</span></div>
+      </div>
+      ${p.isCustom?`<button class="btn btn-danger btn-sm" style="flex-shrink:0" onclick="deleteCustomPlant('${p.key||p.label}')">✕</button>`:''}`;
+    grid.appendChild(card);
+  });
+}
+
+function deleteCustomPlant(keyOrLabel) {
+  const plants = loadCustomPlants();
+  const updated = plants.filter(p => (p.key||p.label) !== keyOrLabel);
+  saveCustomPlants(updated);
+  renderPlantLibrary();
+  toast('Custom plant removed');
+}
+
+function clearCustomPlants() {
+  if (!confirm('Remove all custom plants?')) return;
+  saveCustomPlants([]);
+  renderPlantLibrary();
+  toast('Custom plants cleared');
+}
+
+/* ═══ ADD PLANT MODAL ═══ */
+let modalSelectedColor = '#639922';
+let modalCompanions = [];
+let modalAvoid = [];
+
+function openAddPlantModal(existing) {
+  modalSelectedColor = existing?.bg || '#639922';
+  modalCompanions = existing?.companions || [];
+  modalAvoid = existing?.avoid || [];
+
+  const modal = document.getElementById('plant-modal-inner');
+  const allKeys = [...Object.keys(BUILTIN_PLANTS), ...loadCustomPlants().map(p=>p.key||p.label)];
+
+  modal.innerHTML = `
+    <div class="modal-header">
+      <div class="modal-title">${existing ? 'Edit' : 'Add'} custom plant</div>
+      <button class="modal-close" onclick="closeAddPlantModal()">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Plant name</label>
+          <input type="text" class="form-input" id="mp-name" value="${existing?.label||''}" placeholder="e.g. Lemongrass">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Plants per sq ft</label>
+          <select class="form-select" id="mp-sqft">
+            <option value="1" ${(!existing||existing.sqft===1)?'selected':''}>1 (large plant)</option>
+            <option value="2" ${existing?.sqft===2?'selected':''}>2</option>
+            <option value="4" ${existing?.sqft===4?'selected':''}>4</option>
+            <option value="9" ${existing?.sqft===9?'selected':''}>9</option>
+            <option value="16" ${existing?.sqft===16?'selected':''}>16 (seeds)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sun needs</label>
+          <select class="form-select" id="mp-sun">
+            <option value="full" ${existing?.sun==='full'?'selected':''}>Full sun (6+ hrs)</option>
+            <option value="part" ${existing?.sun==='part'?'selected':''}>Part sun (4–6 hrs)</option>
+            <option value="any" ${(!existing||existing.sun==='any')?'selected':''}>Any</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Height</label>
+          <select class="form-select" id="mp-height">
+            <option value="tall" ${existing?.height==='tall'?'selected':''}>Tall (shades neighbors)</option>
+            <option value="medium" ${(!existing||existing.height==='medium')?'selected':''}>Medium</option>
+            <option value="short" ${existing?.height==='short'?'selected':''}>Short / ground</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Season</label>
+          <select class="form-select" id="mp-season">
+            <option value="cool" ${existing?.season==='cool'?'selected':''}>Cool season (Oct–Mar in FL)</option>
+            <option value="warm" ${existing?.season==='warm'?'selected':''}>Warm season (Mar–Sep)</option>
+            <option value="both" ${(!existing||existing.season==='both')?'selected':''}>Both / year-round</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" class="form-input" id="mp-note" value="${existing?.note||''}" placeholder="Growing tips, FL varieties…">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cell color</label>
+        <div class="color-swatches" id="modal-swatches"></div>
+        <input type="color" id="mp-color-picker" value="${modalSelectedColor}" style="margin-top:6px;width:36px;height:28px;border:none;background:none;cursor:pointer;padding:0">
+        <span style="font-size:11px;color:var(--ink-pale)"> or pick custom color</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Good companions <span style="font-weight:300;color:var(--ink-pale)">(tap to add)</span></label>
+        <div class="companion-tags" id="modal-companions"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Avoid planting near <span style="font-weight:300;color:var(--ink-pale)">(tap to add)</span></label>
+        <div class="companion-tags" id="modal-avoid"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:.5rem;border-top:1px solid var(--fog)">
+        <button class="btn btn-secondary" onclick="closeAddPlantModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCustomPlant()">Save plant</button>
+      </div>
+    </div>`;
+
+  // Render swatches
+  const swatchWrap = document.getElementById('modal-swatches');
+  SWATCH_COLORS.forEach(c => {
+    const s = document.createElement('div');
+    s.className = 'color-swatch-opt' + (c === modalSelectedColor ? ' selected' : '');
+    s.style.background = c;
+    s.addEventListener('click', () => {
+      modalSelectedColor = c;
+      document.getElementById('mp-color-picker').value = c;
+      swatchWrap.querySelectorAll('.color-swatch-opt').forEach(el => el.classList.toggle('selected', el.style.background === c || el.style.backgroundColor === c));
+    });
+    swatchWrap.appendChild(s);
+  });
+  document.getElementById('mp-color-picker').addEventListener('input', e => {
+    modalSelectedColor = e.target.value;
+    swatchWrap.querySelectorAll('.color-swatch-opt').forEach(el => el.classList.remove('selected'));
+  });
+
+  // Companion tags
+  const compWrap = document.getElementById('modal-companions');
+  const avoidWrap = document.getElementById('modal-avoid');
+  allKeys.forEach(k => {
+    const p = BUILTIN_PLANTS[k] || loadCustomPlants().find(cp=>(cp.key||cp.label)===k);
+    if (!p) return;
+    const ct = document.createElement('div'); ct.className='ctag'+(modalCompanions.includes(k)?' selected':'');
+    ct.textContent = p.label||k;
+    ct.addEventListener('click', () => {
+      if (modalCompanions.includes(k)) modalCompanions = modalCompanions.filter(c=>c!==k);
+      else modalCompanions.push(k);
+      ct.classList.toggle('selected', modalCompanions.includes(k));
+    });
+    compWrap.appendChild(ct);
+
+    const at = document.createElement('div'); at.className='ctag avoid-tag'+(modalAvoid.includes(k)?' selected':'');
+    at.textContent = p.label||k;
+    at.addEventListener('click', () => {
+      if (modalAvoid.includes(k)) modalAvoid = modalAvoid.filter(c=>c!==k);
+      else modalAvoid.push(k);
+      at.classList.toggle('selected', modalAvoid.includes(k));
+    });
+    avoidWrap.appendChild(at);
+  });
+
+  document.getElementById('plant-modal').classList.remove('hidden');
+}
+
+function closeAddPlantModal() {
+  document.getElementById('plant-modal').classList.add('hidden');
+}
+
+function saveCustomPlant() {
+  const name = document.getElementById('mp-name').value.trim();
+  if (!name) { toast('Plant needs a name'); return; }
+  const key = name.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+  const plant = {
+    key, label:name,
+    bg: modalSelectedColor,
+    sqft: parseInt(document.getElementById('mp-sqft').value)||1,
+    sun: document.getElementById('mp-sun').value,
+    height: document.getElementById('mp-height').value,
+    season: document.getElementById('mp-season').value,
+    note: document.getElementById('mp-note').value.trim(),
+    companions: modalCompanions,
+    avoid: modalAvoid,
+    isCustom: true,
+  };
+  const plants = loadCustomPlants();
+  const existingIdx = plants.findIndex(p => p.key === key);
+  if (existingIdx > -1) plants[existingIdx] = plant;
+  else plants.push(plant);
+  saveCustomPlants(plants);
+  closeAddPlantModal();
+  renderPlantLibrary();
+  toast(`"${name}" saved to plant library`);
+}
+
+/* ═══ EXPORT / IMPORT ═══ */
+function exportConfig() {
+  const config = {
+    exportedAt: new Date().toISOString(),
+    zone: JSON.parse(localStorage.getItem(ZONE_KEY) || '{}'),
+    beds: JSON.parse(localStorage.getItem(BEDS_KEY) || '[]'),
+    customPlants: JSON.parse(localStorage.getItem(PLANTS_KEY) || '[]'),
+    layouts: JSON.parse(localStorage.getItem(LAYOUT_KEY) || '{}'),
+  };
+  document.getElementById('export-text').value = JSON.stringify(config, null, 2);
+  toast('Export JSON generated — copy and save it');
+}
+
+function importConfig() {
+  const text = document.getElementById('import-text').value.trim();
+  if (!text) { toast('Paste a JSON config first'); return; }
+  try {
+    const config = JSON.parse(text);
+    if (config.zone)         localStorage.setItem(ZONE_KEY,   JSON.stringify(config.zone));
+    if (config.beds)         localStorage.setItem(BEDS_KEY,   JSON.stringify(config.beds));
+    if (config.customPlants) localStorage.setItem(PLANTS_KEY, JSON.stringify(config.customPlants));
+    if (config.layouts)      localStorage.setItem(LAYOUT_KEY, JSON.stringify(config.layouts));
+    loadZone();
+    renderBedsList();
+    renderPlantLibrary();
+    document.getElementById('import-text').value = '';
+    toast('Config imported successfully');
+    flashSaved();
+  } catch(e) {
+    toast('Invalid JSON — check your paste and try again');
+  }
+}
+
+function resetAllData() {
+  if (!confirm('This will delete ALL your garden data including beds, layouts, and custom plants. Are you sure?')) return;
+  [ZONE_KEY, BEDS_KEY, PLANTS_KEY, LAYOUT_KEY, 'garden_health_v1', 'garden_log_v1'].forEach(k => localStorage.removeItem(k));
+  loadZone();
+  renderBedsList();
+  renderPlantLibrary();
+  toast('All garden data reset');
+}
+
+
+/* ─── Render saved beds list ─── */
+function renderBedsList() {
+  const beds = JSON.parse(localStorage.getItem(BEDS_KEY) || '[]');
+  const list = document.getElementById('beds-list');
+  if (!list) return;
+  if (!beds.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--ink-pale);padding:.5rem 0">No saved beds yet — draw a shape above and click Save bed.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  beds.forEach(bed => {
+    const card = document.createElement('div');
+    card.className = 'bed-card';
+    const sunIcon = bed.sun === 'full' ? '☀' : bed.sun === 'part' ? '◑' : '◐';
+    const sqft = bed.sqft ? bed.sqft.toFixed(1) : '?';
+    card.innerHTML = `
+      <div class="bed-card-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="2" y="2" width="14" height="4" rx="1.5" fill="white" opacity=".7"/>
+          <rect x="2" y="8" width="5" height="8" rx="1" fill="white" opacity=".5"/>
+          <rect x="8.5" y="8" width="5.5" height="8" rx="1" fill="white" opacity=".5"/>
+        </svg>
+      </div>
+      <div class="bed-card-body">
+        <div class="bed-card-name">${bed.name}</div>
+        <div class="bed-card-meta">${sqft} sq ft · ${bed.cols}×${bed.rows} grid · ${sunIcon} ${bed.sun} sun · ${bed.depth || 18}" deep</div>
+      </div>
+      <div class="bed-card-actions">
+        <button class="btn btn-secondary btn-sm" onclick="editBed('${bed.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteBed('${bed.id}')">Delete</button>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+/* ═══ INIT ═══ */
+loadZone();
+initBuilderGrid();
+renderBedsList();
+renderPlantLibrary();
+</script>
+</body>
+</html>
