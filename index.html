@@ -34,7 +34,7 @@ nav{position:sticky;top:0;z-index:100;background:var(--soil);display:flex;align-
 /* HERO */
 .hero{background:var(--soil);padding:clamp(2rem,6vw,5rem) 1.25rem clamp(1.5rem,4vw,4rem);position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 50%,rgba(74,124,35,.18) 0%,transparent 50%),radial-gradient(circle at 80% 30%,rgba(232,160,32,.12) 0%,transparent 40%)}
-.hero-inner{max-width:1100px;margin:0 auto;position:relative}
+.hero-inner{max-width:860px;margin:0 auto;position:relative}
 .hero-eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--leaf-light);margin-bottom:.75rem;font-weight:400}
 .hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,5vw,3.8rem);color:var(--cream);line-height:1.15;margin-bottom:1rem}
 .hero h1 em{color:var(--sun-pale);font-style:italic}
@@ -47,7 +47,7 @@ nav{position:sticky;top:0;z-index:100;background:var(--soil);display:flex;align-
 /* SECTIONS */
 section{padding:clamp(2rem,5vw,3.5rem) clamp(1rem,4vw,2rem)}
 section:nth-child(even){background:var(--parchment)}
-.section-inner{max-width:1200px;margin:0 auto}
+.section-inner{max-width:960px;margin:0 auto}
 .section-eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--terracotta);margin-bottom:.4rem;font-weight:500}
 .section-title{font-family:'Playfair Display',serif;font-size:clamp(1.2rem,4vw,2.2rem);color:var(--ink);margin-bottom:.4rem;line-height:1.2}
 .section-desc{font-size:13px;color:var(--ink-light);margin-bottom:1.5rem;max-width:660px;line-height:1.6}
@@ -314,26 +314,15 @@ section:nth-child(even){background:var(--parchment)}
 /* GROW BAGS */
 .growbag-section{margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--fog)}
 .growbag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:.75rem;margin-top:.75rem}
-.growbag-card{background:var(--cream);border:1px solid var(--fog);border-radius:12px;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
-.growbag-card-header{display:flex;align-items:center;gap:10px}
-.growbag-art{width:46px;height:46px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
-.growbag-art canvas{width:72%;height:72%;image-rendering:pixelated}
-.growbag-name{font-size:13px;font-weight:500;color:var(--ink);line-height:1.2}
-.growbag-meta{font-size:11px;color:var(--ink-pale);margin-top:2px}
-.growbag-gallon{font-size:10px;font-weight:500;background:var(--soil);color:var(--sun-pale);padding:3px 9px;border-radius:10px;white-space:nowrap;flex-shrink:0}
-.growbag-bar-wrap{padding:.1rem 0}
-.growbag-bar-lbl{font-size:10px;color:var(--ink-pale)}
-.growbag-bar-track{height:8px;background:var(--fog);border-radius:4px;overflow:hidden;margin-top:2px}
-.growbag-bar-fill{height:100%;border-radius:4px;transition:width .4s}
-.growbag-soil-block{padding:.5rem 0;border-top:.5px solid var(--fog)}
-.growbag-soil{font-size:11px;color:var(--ink-light);line-height:1.55;display:flex;gap:5px;align-items:baseline;flex-wrap:wrap;margin-bottom:.2rem}
-.growbag-actions{display:flex;gap:6px;padding-top:.4rem;border-top:.5px solid var(--fog)}
-.gb-action-btn{flex:1;padding:6px 0;border-radius:6px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;font-weight:400;border:1px solid var(--fog)}
-.gb-edit-btn{background:transparent;color:var(--leaf);border-color:rgba(74,124,35,.3)}
-.gb-edit-btn:hover{background:var(--leaf-mid);color:#fff;border-color:var(--leaf-mid)}
-.gb-remove-btn{background:transparent;color:var(--terracotta);border-color:rgba(196,97,42,.25)}
-.gb-remove-btn:hover{background:var(--terracotta);color:#fff;border-color:var(--terracotta)}
-.growbag-add-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:.85rem;border:1.5px dashed var(--fog);border-radius:12px;cursor:pointer;font-size:12px;color:var(--ink-pale);background:transparent;width:100%;font-family:'DM Sans',sans-serif;transition:all .15s}
+.growbag-card{background:var(--cream);border:1px solid var(--fog);border-radius:10px;padding:.9rem 1rem;position:relative}
+.growbag-card-header{display:flex;align-items:center;gap:10px;margin-bottom:.5rem}
+.growbag-icon{width:36px;height:36px;border-radius:8px;background:var(--soil);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+.growbag-name{font-size:13px;font-weight:500;color:var(--ink)}
+.growbag-meta{font-size:11px;color:var(--ink-pale);margin-top:1px}
+.growbag-gallon{position:absolute;top:.6rem;right:.75rem;font-size:10px;font-weight:500;background:var(--soil);color:var(--sun-pale);padding:2px 8px;border-radius:10px}
+.growbag-soil{font-size:11px;color:var(--ink-light);line-height:1.55;margin-top:.4rem;padding-top:.4rem;border-top:.5px solid var(--fog)}
+.growbag-soil-lbl{font-weight:500;color:var(--ink);display:block;margin-bottom:2px}
+.growbag-add-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:.75rem;border:1.5px dashed var(--fog);border-radius:10px;cursor:pointer;font-size:12px;color:var(--ink-pale);background:transparent;width:100%;font-family:'DM Sans',sans-serif;transition:all .15s}
 .growbag-add-btn:hover{border-color:var(--leaf-mid);color:var(--leaf);background:rgba(74,124,35,.04)}
 .gb-modal-backdrop{position:fixed;inset:0;background:rgba(26,18,8,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
 .gb-modal-backdrop.hidden{display:none}
@@ -569,115 +558,6 @@ footer span{color:var(--leaf-light)}
 </section>
 
 <!-- CARE -->
-
-<!-- GROW BAGS -->
-  <section id="growbags">
-  <div class="section-inner">
-    <div class="section-eyebrow">Grow bags & containers</div>
-    <div class="section-title">Fabric grow bags</div>
-    <div class="section-desc">Track your grow bags by gallon size. Each bag shows the right soil mix and fertilizer for its plant. Your custom bags are saved automatically.</div>
-    <div class="growbag-grid" id="growbag-grid"></div>
-  </div>
-</section>
-
-
-<!-- SHOPPING LIST -->
-<section id="shopping">
-  <div class="section-inner">
-    <div class="section-eyebrow">Zone 10a · May 2026</div>
-    <div class="section-title">Shopping list</div>
-    <div class="section-desc">Warm season plants only. Buy this week. Do not buy cool-season crops until September.</div>
-
-    <div class="card-grid" style="margin-bottom:1.5rem">
-
-      <!-- BUY THIS WEEK -->
-      <div class="info-card" style="grid-column:1/-1">
-        <h4>Buy this week — warm season</h4>
-        <div class="table-scroll">
-          <table class="schedule-table">
-            <tr><th>Plant</th><th>Qty</th><th>Bed / Location</th><th>Where to buy</th><th>Est. cost</th></tr>
-            <tr><td>Basil — Genovese</td><td>6</td><td>Bed D, Bed C</td><td>Edible Plant Nursery / Home Depot</td><td>~$12</td></tr>
-            <tr><td>Basil — Thai</td><td>5</td><td>Bed A, Bed B</td><td>Edible Plant Nursery</td><td>~$10</td></tr>
-            <tr><td>Marigold — French dwarf</td><td>28</td><td>All beds + fig + berry + guava boxes</td><td>Home Depot / Lowe's</td><td>~$42</td></tr>
-            <tr><td>Nasturtium</td><td>9</td><td>Bed D + fig + berry + guava boxes</td><td>Living Roots / Edible Plant</td><td>~$27</td></tr>
-            <tr><td>Cantaloupe — Seminole</td><td>2</td><td>Bed D center arm</td><td>Edible Plant Nursery</td><td>~$8</td></tr>
-            <tr><td>Jalapeño</td><td>2</td><td>Bed D</td><td>Edible Plant / Home Depot</td><td>~$8</td></tr>
-            <tr><td>Cuban oregano</td><td>4</td><td>Bed A, Bed B ground cover</td><td>Living Roots Eco Design</td><td>~$16</td></tr>
-            <tr><td>Lemongrass</td><td>4</td><td>Bed B, Bed C + outside guava boxes</td><td>Willow Tree / Living Roots</td><td>~$24</td></tr>
-            <tr><td>Chives</td><td>2</td><td>One per guava box (front yard)</td><td>Home Depot / Edible Plant</td><td>~$6</td></tr>
-            <tr><td>Creeping thyme</td><td>5</td><td>Fig half circle + berry cluster</td><td>Home Depot / Lowe's</td><td>~$15</td></tr>
-            <tr><td>Pentas</td><td>6</td><td>Berry cluster + near fruit trees</td><td>Home Depot / Lowe's</td><td>~$18</td></tr>
-            <tr><td>Pigeon pea</td><td>3</td><td>In ground near mango bags</td><td>Living Roots / Edible Plant</td><td>~$12</td></tr>
-            <tr><td>Ginger rhizomes</td><td>3</td><td>Ground surrounding mango bags</td><td>Any nursery or grocery store</td><td>~$8</td></tr>
-            <tr><td>Turmeric rhizomes</td><td>3</td><td>Ground surrounding mango bags</td><td>Any nursery or grocery store</td><td>~$7</td></tr>
-            <tr><td>Cassava cuttings</td><td>3–4</td><td>East or west fence line</td><td>Edible Plant Nursery</td><td>~$10</td></tr>
-            <tr><td>Fiji Dwarf / Maypan coconut</td><td>1</td><td>South fence SW corner, 15ft from structures</td><td>Sunscape / Willow Tree</td><td>~$60</td></tr>
-            <tr style="font-weight:500;background:var(--parchment)"><td colspan="4">Estimated total — plants</td><td>~$283</td></tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- SUPPLIES -->
-      <div class="info-card">
-        <h4>Supplies — buy same trip</h4>
-        <ul>
-          <li><strong>Neem oil</strong> — treat front guava mealybugs before planting companions. Mix 5ml + 5ml dish soap per liter water, spray every 7 days × 3 weeks.</li>
-          <li><strong>Sticky trunk bands</strong> — wrap around each front guava trunk to stop ants carrying mealybugs back up.</li>
-          <li><strong>Drip irrigation kit</strong> — most important infrastructure purchase before June. Set timer for 6am daily.</li>
-          <li><strong>Pot feet / risers</strong> — elevate every grow bag and plastic pot off ground. Non-negotiable.</li>
-          <li><strong>Slow release fertilizer 8-3-9</strong> — palm/tropical formula for mango and peach bags.</li>
-          <li><strong>Worm castings</strong> — top dress all grow bags immediately.</li>
-          <li><strong>Fish emulsion + liquid seaweed</strong> — every 2 weeks on mango, peach, banana bags.</li>
-        </ul>
-      </div>
-
-      <!-- ALREADY OWN — TRANSPLANT NOW -->
-      <div class="info-card">
-        <h4>Already owned — transplant this week</h4>
-        <ul>
-          <li><strong>California wonder bell pepper</strong> — into Bed D now</li>
-          <li><strong>Mimi red pepper</strong> — into Bed D now</li>
-          <li><strong>Longevity spinach</strong> — into Bed A</li>
-          <li><strong>Big leaf longevity spinach</strong> — into Bed A or B</li>
-          <li><strong>Okinawa spinach ×2</strong> — one each into Beds A and B</li>
-          <li><strong>Borage</strong> — into Bed D corner</li>
-          <li><strong>Garlic chives</strong> — divide and put starts into Bed C</li>
-        </ul>
-      </div>
-
-      <!-- DO NOT BUY NOW -->
-      <div class="info-card" style="border-left:3px solid var(--terracotta)">
-        <h4 style="color:var(--terracotta)">Do NOT buy until September</h4>
-        <p style="font-size:12px;color:var(--ink-light);margin-bottom:.5rem">These are cool-season crops. They will bolt and die in May heat. Buy in September, plant October.</p>
-        <ul>
-          <li>Kale, arugula, spinach (regular)</li>
-          <li>Cilantro, parsley</li>
-          <li>Carrots, radish</li>
-          <li>Onion, garlic</li>
-          <li>Cabbage, lettuce</li>
-          <li>Potatoes — plant in January for March harvest</li>
-        </ul>
-      </div>
-
-      <!-- LOCAL NURSERIES -->
-      <div class="info-card" style="grid-column:1/-1">
-        <h4>Local St. Pete nurseries</h4>
-        <div class="table-scroll">
-          <table class="schedule-table">
-            <tr><th>Nursery</th><th>Address</th><th>Hours</th><th>Best for</th></tr>
-            <tr><td><strong>Edible Plant Nursery</strong></td><td>1740 21st St N</td><td>Sat 9am–1pm only</td><td>Edible plants, Seminole cantaloupe, tropical starts</td></tr>
-            <tr><td><strong>Living Roots Eco Design</strong></td><td>3645 45th Ave N</td><td>Thu–Fri 9am–4pm · Sat 9am–3pm</td><td>Edibles, natives, Cuban oregano, pigeon pea</td></tr>
-            <tr><td><strong>Willow Tree Nursery</strong></td><td>St. Pete</td><td>Call ahead</td><td>Fruit trees, lemongrass, general selection</td></tr>
-            <tr><td><strong>Sunscape Nursery</strong></td><td>St. Pete</td><td>Call ahead</td><td>Tropical trees, coconut palms</td></tr>
-            <tr><td><strong>Home Depot / Lowe's</strong></td><td>Multiple locations</td><td>Daily</td><td>Marigolds, basil, pentas, neem oil, irrigation</td></tr>
-          </table>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
 </div>
 
 <div class="page-view" id="page-grow">
@@ -795,6 +675,15 @@ footer span{color:var(--leaf-light)}
   </div>
 </section>
 
+<!-- GROW BAGS -->
+  <section id="growbags">
+  <div class="section-inner">
+    <div class="section-eyebrow">Container growing</div>
+    <div class="section-title">Fabric grow bags</div>
+    <div class="section-desc">Track your grow bags by gallon size. Each bag shows the right soil mix and fertilizer for its plant. Your custom bags are saved automatically.</div>
+    <div class="growbag-grid" id="growbag-grid"></div>
+  </div>
+</section>
 </div>
 
 
@@ -934,28 +823,6 @@ const PLANTS = {
   bananapup: {bg:'#7fb23a',label:'Pup',       sqft:1,  note:'Keep 1–2 pups per stool max. Remove all others.'},
   zone:      {bg:'#d5ccb8',label:'2ft zone',  sqft:0,  note:'Clearance buffer — banana root zone.'},
   fence:     {bg:'#9c8c7c',label:'Fence',     sqft:0,  note:'6 ft south perimeter fence.'},
-  // ── NEW PLANTS ──
-  jalapeno:      {bg:'#2d6b1a',label:'Jalapeño',        sqft:1,  note:'Full sun, productive year-round in Zone 10a. Companion: basil, marigold.'},
-  mimipepper:    {bg:'#c4122a',label:'Mimi Red Pepper',  sqft:1,  note:'Compact sweet pepper. Full sun. Companion: basil, marigold, borage.'},
-  cubanoregano:  {bg:'#5a7c2a',label:'Cuban Oregano',    sqft:1,  note:'Heat tolerant ground cover. Deters pests. Perennial in Zone 10a.'},
-  lemongrass:    {bg:'#8aaa2a',label:'Lemongrass',       sqft:2,  note:'Deters whiteflies and mealybugs. Clumping, perennial. Full sun 6+ hrs.'},
-  creepingthyme: {bg:'#7a9a3a',label:'Creeping Thyme',   sqft:1,  note:'Ground cover under trees. Deters pests, drought tolerant, perennial.'},
-  pentas:        {bg:'#d44a8a',label:'Pentas',            sqft:1,  note:'Top pollinator attractor FL. Butterflies love it. Perennial Zone 10a.'},
-  pigeonpea:     {bg:'#8a6a2a',label:'Pigeon Pea',        sqft:4,  note:'Nitrogen fixer. Plant near mango bags in ground. Gets 3-12 ft tall.'},
-  ginger:        {bg:'#c4922a',label:'Ginger',             sqft:1,  note:'Understory companion for mangos. Plant outside bag drip line.'},
-  turmeric:      {bg:'#d4a820',label:'Turmeric',           sqft:1,  note:'Understory companion. Same conditions as ginger. Kitchen staple.'},
-  cassava:       {bg:'#8a7a5a',label:'Cassava',            sqft:4,  note:'Tropical root crop. Full sun, drought tolerant. 8-12 months to harvest.'},
-  coconut:       {bg:'#8a6a3a',label:'Dwarf Coconut',      sqft:16, note:'Fiji Dwarf or Maypan for LY resistance. Full sun. Fruits in 3-4 years.'},
-  moringa:       {bg:'#3a7a1a',label:'Moringa',             sqft:4,  note:'Currently in nursery pot. Fast growing, edible leaves. Plant near fence.'},
-  guava:         {bg:'#6aaa2a',label:'Guava',               sqft:16, note:'Two in front yard 2x2 boxes. Treat mealybugs before companion planting.'},
-  avocado:       {bg:'#2a5a1a',label:'Avocado',             sqft:16, note:'URGENT: repot from 7 gal to 25 gal. Will not fruit in 7 gal.'},
-  fig:           {bg:'#6a4a2a',label:'Fig Tree',            sqft:16, note:'Struggling — likely nematodes. Fertilize, heavy mulch, marigold ring.'},
-  blueberry:     {bg:'#2a2a8a',label:'Blueberry',           sqft:4,  note:'In ground. Southern Highbush variety. Acidic soil pH 4.5-5.5.'},
-  blackberry:    {bg:'#1a0a2a',label:'Blackberry',          sqft:4,  note:'In ground with 6x6 ft trellis. Keep brambles from blueberry roots.'},
-  passionfruit:  {bg:'#8a2a6a',label:'Passion Fruit',       sqft:4,  note:'In ground with 8x6 ft trellis. Vigorous — train regularly.'},
-  pineappleguava:{bg:'#5a8a3a',label:'Pineapple Guava',     sqft:4,  note:'In ground. Slow grower, very low maintenance. Fruit in fall.'},
-  chives:        {bg:'#4a8a4a',label:'Chives',               sqft:1,  note:'Deters ants that carry mealybugs. Good guava companion. Perennial.'},
-  seminolepumpkin:{bg:'#d47a1a',label:'Seminole Pumpkin',   sqft:4,  note:'FL heritage variety. Extremely heat tolerant. Train vines to trellis.'},
 };
 
 // Legacy aliases for backwards compat
@@ -996,36 +863,6 @@ const PLANT_META = {
   chard:     {sun:'full', height:'medium', season:'both', border:false, companions:['onion','garlic','beans'],                      avoid:[]},
   beans:     {sun:'full', height:'tall',   season:'warm', border:false, companions:['carrot','cucumber','chard'],                   avoid:['onion','garlic','carrot']},
   cucumber:  {sun:'full', height:'tall',   season:'warm', border:false, companions:['nasturtium','beans','marigold'],               avoid:['aromatic herbs']},
-  // ── NEW PLANT META ──
-  jalapeno:      {sun:'full', height:'medium', season:'warm', border:false, companions:['basil','marigold','carrot','tomato'],       avoid:['fennel']},
-  mimipepper:    {sun:'full', height:'medium', season:'warm', border:false, companions:['basil','marigold','carrot'],                avoid:['fennel']},
-  cubanoregano:  {sun:'full', height:'low',    season:'warm', border:true,  companions:['tomato','pepper','marigold'],              avoid:[]},
-  lemongrass:    {sun:'full', height:'tall',   season:'warm', border:false, companions:['basil','marigold','guava'],                avoid:[]},
-  creepingthyme: {sun:'full', height:'low',    season:'warm', border:true,  companions:['marigold','fig','blueberry'],              avoid:[]},
-  pentas:        {sun:'full', height:'medium', season:'warm', border:false, companions:['marigold','nasturtium'],                   avoid:[]},
-  pigeonpea:     {sun:'full', height:'tall',   season:'warm', border:false, companions:['carriemango','fairchildmango'],            avoid:[]},
-  ginger:        {sun:'part', height:'medium', season:'warm', border:false, companions:['carriemango','fairchildmango','turmeric'], avoid:[]},
-  turmeric:      {sun:'part', height:'medium', season:'warm', border:false, companions:['ginger','carriemango'],                   avoid:[]},
-  cassava:       {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','basil'],                       avoid:[]},
-  coconut:       {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold'],                               avoid:[]},
-  moringa:       {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','basil'],                       avoid:[]},
-  guava:         {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','nasturtium','chives','lemongrass'], avoid:['cucumber']},
-  avocado:       {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','basil','nasturtium'],          avoid:[]},
-  fig:           {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','creepingthyme','nasturtium'],  avoid:[]},
-  blueberry:     {sun:'full', height:'medium', season:'warm', border:false, companions:['marigold','creepingthyme','pentas'],      avoid:['asparagus']},
-  blackberry:    {sun:'full', height:'medium', season:'warm', border:false, companions:['marigold','creepingthyme','pentas','nasturtium'], avoid:[]},
-  passionfruit:  {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','nasturtium','pentas'],         avoid:[]},
-  pineappleguava:{sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','creepingthyme','pentas'],      avoid:[]},
-  chives:        {sun:'full', height:'low',    season:'warm', border:true,  companions:['guava','marigold','carrot'],              avoid:['beans','peas']},
-  seminolepumpkin:{sun:'full',height:'medium', season:'warm', border:false, companions:['marigold','nasturtium','basil'],          avoid:['potato']},
-  longevitysp:   {sun:'part', height:'medium', season:'warm', border:false, companions:['marigold','basil'],                       avoid:[]},
-  okinawasp:     {sun:'part', height:'medium', season:'warm', border:false, companions:['marigold','basil'],                       avoid:[]},
-  zaatar:        {sun:'full', height:'medium', season:'warm', border:false, companions:['marigold','basil','tomato'],              avoid:[]},
-  muscadine:     {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','nasturtium'],                  avoid:[]},
-  carriemango:   {sun:'full', height:'tall',   season:'warm', border:false, companions:['nasturtium','marigold','lemongrass'],     avoid:[]},
-  fairchildmango:{sun:'full', height:'tall',   season:'warm', border:false, companions:['nasturtium','marigold','lemongrass'],     avoid:[]},
-  flbestpeach:   {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','nasturtium'],                  avoid:[]},
-  banana:        {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','nasturtium'],                  avoid:[]},
 };
 
 /* ═══════════ SOIL & FERTILIZER DATABASE ═══════════ */
@@ -1339,37 +1176,9 @@ const PX={
   chard:     [[0,1,0,1,0,1,0,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
   beans:     [[0,0,1,1,1,0,0,0],[0,1,0,1,0,1,0,0],[1,0,1,1,1,0,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
   cucumber:  [[0,0,1,1,1,0,0,0],[0,1,1,0,1,1,0,0],[1,1,0,0,0,1,1,0],[0,1,1,0,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
-  carriemango:  [[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
-  fairchildmango:[[0,0,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,0,1,0,0,0]],
-  flbestpeach:   [[0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0],[0,1,1,0,1,1,1,0],[1,1,1,0,1,1,1,1],[1,1,1,0,1,1,1,1],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
   muscadine: [[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,1,1,0,1,1],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0]],
   banana:    [[0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[1,1,1,0,0,1,1,1],[1,1,1,0,0,1,1,1],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
   bananapup: [[0,0,0,1,0,0,0,0],[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[0,1,1,0,1,1,0,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
-  // ── NEW PLANT PIXEL ART ──
-  jalapeno:      [[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0],[0,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,0],[0,0,0,1,1,1,0,0],[0,0,0,0,1,0,0,0]],
-  mimipepper:    [[0,0,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[1,1,1,0,0,1,1,1],[1,1,0,0,0,0,1,1],[1,1,0,0,0,0,1,1],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
-  cubanoregano:  [[0,1,1,0,0,1,1,0],[1,1,1,1,1,1,1,1],[1,1,0,1,1,0,1,1],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,0,0,0,1,1],[0,0,0,0,0,0,0,0]],
-  lemongrass:    [[0,1,0,1,0,1,0,1],[1,1,1,1,1,1,1,1],[0,1,0,1,0,1,0,1],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0]],
-  creepingthyme: [[1,1,0,1,1,0,1,1],[1,0,1,0,1,0,1,0],[0,1,1,1,0,1,1,0],[1,1,0,1,1,0,1,1],[0,1,1,0,1,1,0,1],[1,0,1,1,0,1,1,0],[0,1,0,1,1,0,1,0],[1,1,1,0,0,1,1,1]],
-  pentas:        [[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,0,0,0,1,1],[1,0,0,1,1,0,0,1],[1,0,1,1,1,1,0,1],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
-  pigeonpea:     [[0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[0,1,0,1,1,0,1,0],[0,1,0,1,1,0,1,0],[0,0,1,0,0,1,0,0],[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0]],
-  ginger:        [[0,1,1,1,0,0,0,0],[1,1,0,1,1,0,0,0],[0,1,1,0,1,1,0,0],[0,0,1,1,0,1,1,0],[0,0,0,1,1,0,1,1],[0,0,0,0,1,1,1,0],[0,0,0,0,0,1,0,0],[0,0,0,0,1,1,0,0]],
-  turmeric:      [[0,1,1,0,1,1,0,0],[1,1,0,1,1,0,1,0],[0,1,1,0,0,1,1,0],[0,0,1,1,1,0,1,1],[0,0,0,1,0,1,1,0],[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,0,0,0,1,0]],
-  cassava:       [[0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,0,0],[1,1,0,0,0,0,1,0],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0]],
-  coconut:       [[0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,0,0,0,1,1],[1,0,0,0,0,0,0,1],[0,1,0,0,0,0,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
-  moringa:       [[0,0,1,0,1,0,1,0],[0,1,1,1,1,1,1,0],[1,1,0,1,0,1,0,1],[0,1,1,0,1,0,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0]],
-  guava:         [[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,0,0,0,1,1],[1,0,0,1,1,0,0,1],[1,0,1,1,1,1,0,1],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
-  avocado:       [[0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[1,1,1,0,0,1,1,1],[1,1,0,0,0,0,1,1],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,0,0,0,0]],
-  fig:           [[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,1,1,0,1,1],[1,0,1,0,0,1,0,1],[1,0,0,1,1,0,0,1],[0,1,0,0,0,0,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
-  blueberry:     [[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,1,1,0,1,1],[1,1,1,0,0,1,1,1],[1,1,0,0,0,0,1,1],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,0,0,0,0,0]],
-  blackberry:    [[0,0,1,1,1,1,0,0],[0,1,0,1,0,1,0,1],[1,0,1,0,1,0,1,1],[1,1,0,1,0,1,1,1],[0,1,1,0,1,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,0,1,0,0],[0,0,0,0,1,0,0,0]],
-  passionfruit:  [[0,1,1,1,1,1,1,0],[1,1,0,0,0,0,1,1],[1,0,1,0,0,1,0,1],[1,0,0,1,1,0,0,1],[1,0,1,0,0,1,0,1],[1,1,0,0,0,0,1,1],[0,1,1,1,1,1,1,0],[0,0,0,1,1,0,0,0]],
-  pineappleguava:[[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,1,1,0,1,1],[1,0,1,1,1,1,0,1],[1,0,1,0,0,1,0,1],[0,1,0,1,1,0,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
-  chives:        [[0,1,0,1,0,1,0,1],[1,1,1,1,1,1,1,1],[0,1,0,1,0,1,0,1],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0]],
-  seminolepumpkin:[[0,1,1,1,1,1,1,0],[1,1,0,0,0,0,1,1],[1,0,1,0,0,1,0,1],[1,0,0,1,1,0,0,1],[1,0,0,1,1,0,0,1],[1,0,1,0,0,1,0,1],[1,1,0,0,0,0,1,1],[0,1,1,1,1,1,1,0]],
-  longevitysp:   [[0,1,1,0,0,1,1,0],[1,1,0,1,1,0,1,1],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[1,1,0,1,1,0,1,1],[0,1,1,0,0,1,1,0],[0,0,0,0,0,0,0,0]],
-  okinawasp:     [[1,0,1,0,1,0,1,0],[0,1,1,1,1,1,1,0],[1,1,0,1,1,0,1,1],[0,1,1,1,1,1,1,0],[1,1,0,0,0,0,1,1],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,0,0,0,0,0]],
-  zaatar:        [[0,1,0,1,0,1,0,1],[1,0,1,0,1,0,1,0],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0],[0,0,1,0,0,1,0,0],[0,1,1,0,0,1,1,0],[1,0,0,0,0,0,0,1]],
 };
 
 /* ═══════════ GLOBAL STATE ═══════════ */
@@ -2021,7 +1830,7 @@ function toggleBedDSeason() {
   const COLS=20, ROWS=4;
   function isBed(r,c){ return r<=1||(c<=3)||(c>=8&&c<=11)||(c>=16&&c<=19); }
 
-  const CS=48, GAP=3, STEP=CS+GAP;
+  const CS=44, GAP=3, STEP=CS+GAP;
   const PAD=14, BAN_ROWS=2;
   const DIV_H=20;
   const W = PAD*2 + COLS*STEP - GAP + 8;
@@ -2041,7 +1850,7 @@ function toggleBedDSeason() {
     ctx.fillStyle=p.bg; ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=0.5;
     ctx.beginPath(); ctx.roundRect(x,y,CS,CS,3); ctx.fill(); ctx.stroke();
     const px=PX[key];
-    if(px){const off=4,sz=Math.floor((CS-off*2)/8);px.forEach((row,r)=>row.forEach((v,c)=>{if(v){ctx.fillStyle='rgba(255,255,255,.82)';ctx.fillRect(x+off+c*sz,y+off+r*sz,sz,sz);}}));}
+    if(px){const off=3,sz=(CS-off*2)/8;px.forEach((row,r)=>row.forEach((v,c)=>{if(v){ctx.fillStyle='rgba(255,255,255,.82)';ctx.fillRect(x+off+c*sz,y+off+r*sz,sz,sz);}}));}
     if(p.label&&key!=='zone'&&key!=='fence'){
       ctx.fillStyle='rgba(255,255,255,.82)'; ctx.font='500 8px sans-serif';
       ctx.textAlign='center'; ctx.textBaseline='bottom';
@@ -2108,7 +1917,7 @@ function toggleBedDSeason() {
         // Draw pixel art
         const px = PX.muscadine;
         if (px) {
-          const off=4, sz=Math.floor((CS-off*2)/8);
+          const off=4, sz=(CS-off*2)/8;
           px.forEach((row,r) => row.forEach((v,col) => {
             if(v){ ctx.fillStyle='rgba(255,255,255,.85)'; ctx.fillRect(x+off+col*sz, y+off+r*sz, sz, sz); }
           }));
@@ -2439,74 +2248,21 @@ function renderGrowBags() {
     const p = PLANTS[bag.plant] || null;
     const sf = bag.plant ? getSoilFert(bag.plant) : null;
     const gg = GALLON_GUIDE[bag.gallons] || {icon:'🪴',label:bag.gallons+' gal'};
-    // Build card properly so we can embed pixel art canvas
-    card.className = 'growbag-card';
-
-    // Gallon fill bar — visual representation of size (30 gal = 100%)
-    const MAX_GAL = 30;
-    const fillPct = Math.min(100, Math.round((bag.gallons / MAX_GAL) * 100));
-    const fillColor = bag.gallons >= 25 ? '#c4612a' : bag.gallons >= 15 ? '#e8a020' : '#4a7c23';
-
-    // Header row: pixel art + name + gallon badge
-    const header = document.createElement('div');
-    header.className = 'growbag-card-header';
-
-    // Pixel art cell (same as gcell but smaller)
-    const artWrap = document.createElement('div');
-    artWrap.className = 'growbag-art';
-    if (p) {
-      artWrap.style.background = p.bg;
-      const cv = makePixelCanvas(bag.plant, 28);
-      artWrap.appendChild(cv);
-    } else {
-      artWrap.style.background = 'var(--fog)';
-      artWrap.innerHTML = '<div style="font-size:18px">🪴</div>';
-    }
-    header.appendChild(artWrap);
-
-    const nameBlock = document.createElement('div');
-    nameBlock.style.flex = '1';
-    nameBlock.innerHTML = `
-      <div class="growbag-name">${bag.name || (p ? p.label : 'Grow bag')}</div>
-      <div class="growbag-meta">${p ? p.label : 'No plant set'}</div>`;
-    header.appendChild(nameBlock);
-
-    const galBadge = document.createElement('div');
-    galBadge.className = 'growbag-gallon';
-    galBadge.textContent = bag.gallons + ' gal';
-    header.appendChild(galBadge);
-    card.appendChild(header);
-
-    // Gallon visual bar
-    const barWrap = document.createElement('div');
-    barWrap.className = 'growbag-bar-wrap';
-    barWrap.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
-        <span class="growbag-bar-lbl">Bag size</span>
-        <span class="growbag-bar-lbl">${bag.gallons} / 30 gal</span>
+    card.innerHTML = `
+      <div class="growbag-gallon">${gg.label}</div>
+      <div class="growbag-card-header">
+        <div class="growbag-icon">${gg.icon}</div>
+        <div>
+          <div class="growbag-name">${bag.name || (p ? p.label : 'Grow bag')}</div>
+          <div class="growbag-meta">${p ? p.label : 'No plant set'} · ${bag.gallons} gal fabric bag</div>
+        </div>
       </div>
-      <div class="growbag-bar-track">
-        <div class="growbag-bar-fill" style="width:${fillPct}%;background:${fillColor}"></div>
+      ${sf ? `<div class="growbag-soil"><span class="growbag-soil-lbl">Soil mix:</span>${sf.soil}</div>
+              <div class="growbag-soil" style="margin-top:.3rem"><span class="growbag-soil-lbl">Fertilizer:</span>${sf.fert}</div>` : ''}
+      <div style="display:flex;gap:6px;margin-top:.75rem">
+        <button class="btn btn-secondary btn-sm" onclick="editGrowBag(${idx})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteGrowBag(${idx})">Remove</button>
       </div>`;
-    card.appendChild(barWrap);
-
-    // Soil + fert
-    if (sf) {
-      const soilBlock = document.createElement('div');
-      soilBlock.className = 'growbag-soil-block';
-      soilBlock.innerHTML = `
-        <div class="growbag-soil"><span class="sf-tag sf-soil-tag">🌱 Soil</span>${sf.soil}</div>
-        <div class="growbag-soil" style="margin-top:.3rem"><span class="sf-tag sf-fert-tag">🌿 Feed</span>${sf.fert}</div>`;
-      card.appendChild(soilBlock);
-    }
-
-    // Action buttons — consistent with app style
-    const actions = document.createElement('div');
-    actions.className = 'growbag-actions';
-    actions.innerHTML = `
-      <button class="gb-action-btn gb-edit-btn" onclick="editGrowBag(${idx})">Edit</button>
-      <button class="gb-action-btn gb-remove-btn" onclick="deleteGrowBag(${idx})">Remove</button>`;
-    card.appendChild(actions);
     grid.appendChild(card);
   });
 
@@ -2650,10 +2406,7 @@ function saveGrowBag(idx) {
   else bags.push(bag);
   saveGrowBags(bags);
   closeGrowBagModal();
-  renderGrowBags();
-}
-
-// Ensure the three starter grow bags always exist (runs once at page load)
+  // Ensure the three starter grow bags always exist
 (function() {
   const bags = JSON.parse(localStorage.getItem(GB_STORAGE) || '[]');
   const names = bags.map(b => b.name);
@@ -2664,8 +2417,8 @@ function saveGrowBag(idx) {
   ].filter(s => !names.includes(s.name));
   if (toAdd.length) localStorage.setItem(GB_STORAGE, JSON.stringify([...bags, ...toAdd]));
 })();
-
 renderGrowBags();
+}
 
 function editGrowBag(idx) { openGrowBagModal(idx); }
 
