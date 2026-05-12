@@ -71,6 +71,17 @@ section:nth-child(even){background:var(--parchment)}
 .tab-btn.active{background:var(--soil);color:var(--sun-pale);border-color:var(--soil)}
 .tab-panel{display:none}.tab-panel.active{display:block}
 
+/* SEASON SELECTOR */
+.season-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem;padding:10px 12px;background:var(--parchment);border-radius:10px;border:1px solid var(--fog)}
+.season-bar-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-pale);margin-right:4px;white-space:nowrap}
+.season-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--fog);background:var(--cream);color:var(--ink-light);font-size:12px;font-family:'DM Sans',sans-serif;font-weight:400;cursor:pointer;transition:all .15s;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:1px}
+.season-btn:hover{border-color:var(--leaf-mid);color:var(--ink)}
+.season-btn.active{background:var(--leaf);color:#fff;border-color:var(--leaf);font-weight:500}
+.season-btn.active.warm{background:var(--terracotta);border-color:var(--terracotta)}
+.season-btn.active.summer{background:var(--sun);border-color:var(--sun);color:var(--ink)}
+.season-btn-months{font-size:9px;opacity:.75;font-weight:300}
+.season-now-badge{font-size:9px;background:var(--leaf-pale);color:var(--leaf);border-radius:4px;padding:1px 5px;font-weight:500;margin-left:auto;white-space:nowrap}
+.season-btn.active .season-now-badge{background:rgba(255,255,255,.25);color:#fff}
 /* BEDS */
 .bed-wrap{background:var(--cream);border:1px solid var(--fog);border-radius:12px;padding:1rem;margin-bottom:1.25rem}
 .bed-name{font-family:'Playfair Display',serif;font-size:16px;color:var(--ink)}
@@ -441,15 +452,12 @@ footer span{color:var(--leaf-light)}
     <div class="section-eyebrow">Square-foot method</div>
     <div class="section-title">Bed layouts</div>
     <div class="section-desc">Each cell = 1 square foot. Number badge = plants or seeds per sq ft. Tap <strong>Edit tiles</strong> to swap any plant, then tap a cell to place your selection.</div>
+    <div id="season-selector"></div>
     <div id="beds-abc"></div>
     <!-- BED D -->
     <div class="bed-wrap" id="bedD-wrap">
       <div class="bed-name">Bed D — E-shape custom bed</div>
       <div class="bed-meta">South backyard · past pool · full sun 8–10 hrs · muscadine trellis along south fence</div>
-      <div class="season-toggle">
-        <button class="toggle-track" id="bedD-toggle" onclick="toggleBedDSeason()"><div class="toggle-knob"></div></button>
-        <span class="toggle-label" id="bedD-label"><strong>Warm season</strong> — tomato, pepper, cantaloupe, basil</span>
-      </div>
       <div class="edit-toolbar" id="bedD-toolbar"></div>
       <div class="palette-wrap" id="bedD-palette"></div>
       <div class="bed-body">
@@ -893,6 +901,41 @@ footer span{color:var(--leaf-light)}
 </footer>
 
 <script>
+/* ═══════════ CLOUD SYNC ═══════════ */
+// After deploying the Worker, replace the URL below with your actual workers.dev URL
+const GARDEN_API = '';
+const GardenDB = (() => {
+  const SYNC_KEYS = ['garden_layouts_v2', 'garden_growbags_v1', 'garden_health_v1', 'garden_log_v1'];
+  async function init() {
+    try {
+      const res = await fetch(GARDEN_API + '/api/data');
+      if (!res.ok) return;
+      const remote = await res.json();
+      if (Object.keys(remote).length === 0) {
+        for (const key of SYNC_KEYS) {
+          const val = localStorage.getItem(key);
+          if (val) fetch(`${GARDEN_API}/api/data/${encodeURIComponent(key)}`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: val,
+          }).catch(function(e) { console.warn('GardenDB push failed', key, e); });
+        }
+      } else {
+        for (const [key, value] of Object.entries(remote)) {
+          localStorage.setItem(key, JSON.stringify(value));
+        }
+      }
+    } catch(e) { console.warn('GardenDB init failed', e); }
+  }
+  function set(key, value) {
+    fetch(`${GARDEN_API}/api/data/${encodeURIComponent(key)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(value),
+    }).catch(() => {});
+  }
+  return { init, set };
+})();
+const gardenReady = GardenDB.init();
+
 if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=Math.min(r,w/2,h/2);this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.arcTo(x+w,y,x+w,y+r,r);this.lineTo(x+w,y+h-r);this.arcTo(x+w,y+h,x+w-r,y+h,r);this.lineTo(x+r,y+h);this.arcTo(x,y+h,x,y+h-r,r);this.lineTo(x,y+r);this.arcTo(x,y,x+r,y,r);this.closePath();return this;};}
 
 /* ═══════════ SHARED PLANT DATABASE ═══════════ */
@@ -937,6 +980,8 @@ const PLANTS = {
   // ── NEW PLANTS ──
   jalapeno:      {bg:'#2d6b1a',label:'Jalapeño',        sqft:1,  note:'Full sun, productive year-round in Zone 10a. Companion: basil, marigold.'},
   mimipepper:    {bg:'#c4122a',label:'Mimi Red Pepper',  sqft:1,  note:'Compact sweet pepper. Full sun. Companion: basil, marigold, borage.'},
+  bananapep:     {bg:'#d4a820',label:'Sweet Banana Pep', sqft:1,  note:'Sweet elongated pepper, yellow to red at maturity. Prolific in Zone 10a. Full sun. Harvest yellow for mild, red for sweeter.'},
+  cubanopep:     {bg:'#c47a1a',label:'Cubano Pepper',    sqft:1,  note:'Cubanelle/Italian frying pepper. Mild, sweet, thin-walled. Full sun. Excellent for sautéing. Productive year-round in Zone 10a.'},
   cubanoregano:  {bg:'#5a7c2a',label:'Cuban Oregano',    sqft:1,  note:'Heat tolerant ground cover. Deters pests. Perennial in Zone 10a.'},
   lemongrass:    {bg:'#8aaa2a',label:'Lemongrass',       sqft:2,  note:'Deters whiteflies and mealybugs. Clumping, perennial. Full sun 6+ hrs.'},
   creepingthyme: {bg:'#7a9a3a',label:'Creeping Thyme',   sqft:1,  note:'Ground cover under trees. Deters pests, drought tolerant, perennial.'},
@@ -954,8 +999,12 @@ const PLANTS = {
   blackberry:    {bg:'#1a0a2a',label:'Blackberry',          sqft:4,  note:'In ground with 6x6 ft trellis. Keep brambles from blueberry roots.'},
   passionfruit:  {bg:'#8a2a6a',label:'Passion Fruit',       sqft:4,  note:'In ground with 8x6 ft trellis. Vigorous — train regularly.'},
   pineappleguava:{bg:'#5a8a3a',label:'Pineapple Guava',     sqft:4,  note:'In ground. Slow grower, very low maintenance. Fruit in fall.'},
+  starfruit:     {bg:'#d4b820',label:'Star Fruit',           sqft:9,  note:'Averrhoa carambola. Full sun, wind-protected. Fruit Aug–Feb Zone 10a. Moderate drought tolerance once established.'},
+  sugarapple:    {bg:'#5a8a5a',label:'Sugar Apple',          sqft:9,  note:'Annona squamosa. Full sun, pH 6.0–7.5. Drought tolerant. Hand-pollinate for best fruit set. Fruit late summer–fall.'},
+  pomegranate:   {bg:'#c4302a',label:'Pomegranate',          sqft:9,  note:'Punica granatum. Full sun, drought tolerant once established. pH 5.5–7.0. Fruit Sep–Nov. Self-fertile.'},
   chives:        {bg:'#4a8a4a',label:'Chives',               sqft:1,  note:'Deters ants that carry mealybugs. Good guava companion. Perennial.'},
   seminolepumpkin:{bg:'#d47a1a',label:'Seminole Pumpkin',   sqft:4,  note:'FL heritage variety. Extremely heat tolerant. Train vines to trellis.'},
+  roselle:        {bg:'#c4204a',label:'Roselle',             sqft:1,  note:'Hibiscus sabdariffa. Full sun, drought tolerant. Plant Mar–May; harvest calyces Nov–Jan. Gets 4–6 ft tall — place at bed edge or fence.'},
 };
 
 // Legacy aliases for backwards compat
@@ -999,6 +1048,8 @@ const PLANT_META = {
   // ── NEW PLANT META ──
   jalapeno:      {sun:'full', height:'medium', season:'warm', border:false, companions:['basil','marigold','carrot','tomato'],       avoid:['fennel']},
   mimipepper:    {sun:'full', height:'medium', season:'warm', border:false, companions:['basil','marigold','carrot'],                avoid:['fennel']},
+  bananapep:     {sun:'full', height:'medium', season:'warm', border:false, companions:['basil','marigold','borage','carrot'],       avoid:['fennel']},
+  cubanopep:     {sun:'full', height:'medium', season:'warm', border:false, companions:['basil','marigold','borage','carrot'],       avoid:['fennel']},
   cubanoregano:  {sun:'full', height:'low',    season:'warm', border:true,  companions:['tomato','pepper','marigold'],              avoid:[]},
   lemongrass:    {sun:'full', height:'tall',   season:'warm', border:false, companions:['basil','marigold','guava'],                avoid:[]},
   creepingthyme: {sun:'full', height:'low',    season:'warm', border:true,  companions:['marigold','fig','blueberry'],              avoid:[]},
@@ -1018,6 +1069,7 @@ const PLANT_META = {
   pineappleguava:{sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','creepingthyme','pentas'],      avoid:[]},
   chives:        {sun:'full', height:'low',    season:'warm', border:true,  companions:['guava','marigold','carrot'],              avoid:['beans','peas']},
   seminolepumpkin:{sun:'full',height:'medium', season:'warm', border:false, companions:['marigold','nasturtium','basil'],          avoid:['potato']},
+  roselle:        {sun:'full',height:'tall',   season:'warm', border:true,  companions:['marigold','basil','lemongrass'],           avoid:[]},
   longevitysp:   {sun:'part', height:'medium', season:'warm', border:false, companions:['marigold','basil'],                       avoid:[]},
   okinawasp:     {sun:'part', height:'medium', season:'warm', border:false, companions:['marigold','basil'],                       avoid:[]},
   zaatar:        {sun:'full', height:'medium', season:'warm', border:false, companions:['marigold','basil','tomato'],              avoid:[]},
@@ -1026,6 +1078,9 @@ const PLANT_META = {
   fairchildmango:{sun:'full', height:'tall',   season:'warm', border:false, companions:['nasturtium','marigold','lemongrass'],     avoid:[]},
   flbestpeach:   {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','nasturtium'],                  avoid:[]},
   banana:        {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','nasturtium'],                  avoid:[]},
+  starfruit:     {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','nasturtium','lemongrass'],     avoid:[]},
+  sugarapple:    {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','nasturtium'],                  avoid:[]},
+  pomegranate:   {sun:'full', height:'tall',   season:'warm', border:false, companions:['marigold','nasturtium','basil'],          avoid:[]},
 };
 
 /* ═══════════ SOIL & FERTILIZER DATABASE ═══════════ */
@@ -1064,6 +1119,9 @@ const SOIL_FERT = {
   zaatar:     {soil:'Sandy/rocky low-fertility mix · pH 7.0–8.0 · extremely well-drained · less is more',      fert:'Very minimal — light balanced once in spring. Lean soil intensifies flavor. No summer feeding.'},
   curryleaf:  {soil:'Well-drained fertile mix · potting soil + perlite + bark · pH 6.4–6.9 · 5+ gal container',fert:'Balanced water-soluble every 4–6 wks spring/summer · STOP fall/winter · iron supplement if yellowing'},
   banana:     {soil:'Rich moist well-draining mix · 30% compost · 20% perlite · 50% quality potting mix',      fert:'High-potassium fertilizer monthly · magnesium supplement (Epsom salt) quarterly · heavy feeder'},
+  starfruit:  {soil:'Well-drained fertile mix · loamy sand with organic matter · pH 5.5–6.5 · avoid waterlogged soil',  fert:'Balanced 8-3-9 slow-release every 2–3 months · high-potassium at fruit set · iron/zinc foliar spray if yellowing'},
+  sugarapple: {soil:'Well-drained sandy loam · 30% compost · pH 6.0–7.5 · tolerates poor soils but fruit quality improves with organic matter', fert:'Balanced fertilizer quarterly · phosphorus at bud set · reduce nitrogen once flowering to encourage fruit set'},
+  pomegranate:{soil:'Wide soil tolerance · loamy well-drained preferred · pH 5.5–7.0 · amend clay with perlite/sand · tolerates slight alkalinity', fert:'Balanced slow-release in early spring · light potassium boost at fruit formation · minimal feeding once established'},
 };
 
 /* Get soil+fert recommendation for a plant key */
@@ -1347,6 +1405,8 @@ const PX={
   bananapup: [[0,0,0,1,0,0,0,0],[0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[0,1,1,0,1,1,0,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0]],
   // ── NEW PLANT PIXEL ART ──
   jalapeno:      [[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0],[0,0,1,1,1,1,0,0],[0,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,1,0],[0,0,0,1,1,1,0,0],[0,0,0,0,1,0,0,0]],
+  bananapep:     [[0,0,0,1,1,0,0,0],[0,0,0,1,1,1,0,0],[0,0,1,1,1,1,1,0],[0,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,1],[0,0,1,1,1,1,1,0],[0,0,0,1,1,1,0,0],[0,0,0,0,1,0,0,0]],
+  cubanopep:     [[0,0,0,1,1,1,0,0],[0,0,1,1,1,1,1,0],[0,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0],[0,0,0,0,1,0,0,0]],
   mimipepper:    [[0,0,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[1,1,1,0,0,1,1,1],[1,1,0,0,0,0,1,1],[1,1,0,0,0,0,1,1],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
   cubanoregano:  [[0,1,1,0,0,1,1,0],[1,1,1,1,1,1,1,1],[1,1,0,1,1,0,1,1],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,0,0,0,1,1],[0,0,0,0,0,0,0,0]],
   lemongrass:    [[0,1,0,1,0,1,0,1],[1,1,1,1,1,1,1,1],[0,1,0,1,0,1,0,1],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0]],
@@ -1370,16 +1430,35 @@ const PX={
   longevitysp:   [[0,1,1,0,0,1,1,0],[1,1,0,1,1,0,1,1],[0,1,1,1,1,1,1,0],[0,0,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[1,1,0,1,1,0,1,1],[0,1,1,0,0,1,1,0],[0,0,0,0,0,0,0,0]],
   okinawasp:     [[1,0,1,0,1,0,1,0],[0,1,1,1,1,1,1,0],[1,1,0,1,1,0,1,1],[0,1,1,1,1,1,1,0],[1,1,0,0,0,0,1,1],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,0,0,0,0,0]],
   zaatar:        [[0,1,0,1,0,1,0,1],[1,0,1,0,1,0,1,0],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0],[0,0,1,0,0,1,0,0],[0,1,1,0,0,1,1,0],[1,0,0,0,0,0,0,1]],
+  starfruit:     [[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,1,1,0,1,0],[1,1,1,0,1,1,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0]],
+  sugarapple:    [[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,1,1,0,1,1],[1,0,1,0,0,1,0,1],[1,0,0,1,1,0,0,1],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
+  pomegranate:   [[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,0,0,0,1,1],[1,0,0,1,1,0,0,1],[1,0,1,1,1,1,0,1],[0,1,1,0,0,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,1,0,0,0]],
 };
+
+/* ═══════════ SEASONS ═══════════ */
+const SEASONS = {
+  cool:   { label:'Cool Season',   months:'Oct–Jan', colorClass:'cool',   desc:'Greens, root veg, brassicas — peak FL growing season' },
+  warm:   { label:'Warm / Spring', months:'Feb–May', colorClass:'warm',   desc:'Tomatoes, peppers, cantaloupe — spring window' },
+  summer: { label:'Summer / Heat', months:'Jun–Sep', colorClass:'summer', desc:'Heat-tolerant only — gap or switch to tropicals' },
+};
+const SEASON_ORDER = ['cool','warm','summer'];
+function detectSeason() {
+  const m = new Date().getMonth(); // 0-11
+  if (m === 0 || m >= 9) return 'cool';
+  if (m <= 4) return 'warm';
+  return 'summer';
+}
+function nextSeason(s) { const i = SEASON_ORDER.indexOf(s); return SEASON_ORDER[(i+1)%3]; }
+let currentSeason = detectSeason();
 
 /* ═══════════ GLOBAL STATE ═══════════ */
 let selectedPlant = null; // currently selected palette plant key
 let editMode = {}; // bedId -> boolean
-let bedLayouts = {}; // bedId -> array of plant keys (persisted)
+let bedLayouts = {}; // bedId_season -> array of plant keys (persisted)
 
 const LAYOUT_STORAGE = 'garden_layouts_v2';
 function loadLayouts() { return JSON.parse(localStorage.getItem(LAYOUT_STORAGE)||'{}'); }
-function saveLayouts() { localStorage.setItem(LAYOUT_STORAGE, JSON.stringify(bedLayouts)); }
+function saveLayouts() { localStorage.setItem(LAYOUT_STORAGE, JSON.stringify(bedLayouts)); GardenDB.set(LAYOUT_STORAGE, bedLayouts); }
 
 const tip = document.getElementById('global-tip');
 function showTip(e, key) {
@@ -1464,15 +1543,24 @@ function makeCell(key, isVoid, bedId, cellIdx) {
 
 /* ═══════════ TILE SWAP ═══════════ */
 function swapTile(bedId, cellIdx, plantKey) {
-  if (!bedLayouts[bedId]) return;
-  bedLayouts[bedId][cellIdx] = (plantKey === '_erase') ? 'empty' : plantKey;
+  if (bedId === 'bedD') {
+    const sk = 'bedD_' + currentSeason;
+    if (!bedLayouts[sk]) bedLayouts[sk] = makeBedDLayout(currentSeason);
+    bedLayouts[sk][cellIdx] = (plantKey === '_erase') ? 'empty' : plantKey;
+    saveLayouts();
+    if (window.drawEBed) window.drawEBed();
+    return;
+  }
+  const sk = bedSeasonKey(bedId);
+  if (!bedLayouts[sk]) return;
+  bedLayouts[sk][cellIdx] = (plantKey === '_erase') ? 'empty' : plantKey;
   saveLayouts();
   renderBed(bedId);
 }
 
 /* ═══════════ PALETTE ═══════════ */
 const PALETTE_GROUPS = [
-  { label: 'Warm season veg', keys: ['jalapeno','mimipepper','pepper','cantaloupe','seminolepumpkin','cassava','beans','cucumber'] },
+  { label: 'Warm season veg', keys: ['jalapeno','mimipepper','bananapep','cubanopep','pepper','cantaloupe','seminolepumpkin','cassava','beans','cucumber','roselle'] },
   { label: 'Cool season veg', keys: ['tomato','cabbage','carrot','onion','garlic','lettuce','radish','chard'] },
   { label: 'Herbs',      keys: ['basil','cubanoregano','zaatar','lemongrass','chives','cilantro','parsley','greenonion','ginger','turmeric'] },
   { label: 'Flowers & companions', keys: ['marigold','nasturtium','borage','calendula'] },
@@ -1522,8 +1610,10 @@ function buildPalette(bedId, containerEl, toolbarEl) {
     undo.className = 'edit-undo-btn';
     undo.textContent = 'Reset layout';
     undo.addEventListener('click', () => {
-      if (confirm('Reset this bed to the default layout?')) {
-        delete bedLayouts[bedId];
+      if (confirm('Reset this bed to the default layout for ' + SEASONS[currentSeason].label + '?')) {
+        const def = BEDS_DEF.find(b => b.id === bedId);
+        if (def) bedLayouts[bedSeasonKey(bedId)] = [...bedDefaultLayout(def)];
+        else delete bedLayouts[bedSeasonKey(bedId)];
         saveLayouts();
         renderBed(bedId);
         editMode[bedId] = false;
@@ -1650,7 +1740,7 @@ function getBedSun(bedId) {
 function applyAlertFix(bedId, alert) {
   const def = BEDS_DEF.find(b => b.id === bedId);
   if (!def) return;
-  const layout = [...(bedLayouts[bedId] || def.defaultLayout)];
+  const layout = [...(bedLayouts[bedSeasonKey(bedId)] || bedDefaultLayout(def))];
   const cols = def.cols;
   const totalRows = Math.ceil(layout.length / cols);
 
@@ -1692,7 +1782,7 @@ function applyAlertFix(bedId, alert) {
     }
   }
 
-  bedLayouts[bedId] = layout;
+  bedLayouts[bedSeasonKey(bedId)] = layout;
   saveLayouts();
   renderBed(bedId);
   setTimeout(() => runAlerts(bedId), 80);
@@ -1701,7 +1791,7 @@ function applyAlertFix(bedId, alert) {
 function runAlerts(bedId) {
   const def = BEDS_DEF.find(b => b.id === bedId);
   if (!def) return;
-  const layout = bedLayouts[bedId] || def.defaultLayout;
+  const layout = bedLayouts[bedSeasonKey(bedId)] || bedDefaultLayout(def);
   const allAlerts = OPTIMIZER.generateAlerts(layout, def.cols, getBedSun(bedId), bedId);
 
   // Only keep serious: error + warning. Deduplicate by msg.
@@ -1778,7 +1868,7 @@ function runAlerts(bedId) {
 function runOptimize(bedId) {
   const def = BEDS_DEF.find(b => b.id === bedId);
   if (!def) return;
-  const currentLayout = [...(bedLayouts[bedId] || def.defaultLayout)];
+  const currentLayout = [...(bedLayouts[bedSeasonKey(bedId)] || bedDefaultLayout(def))];
   const voidSet = def.voids ? new Set(def.voids) : null;
   const optimized = OPTIMIZER.optimize(currentLayout, def.cols, voidSet, getBedSun(bedId));
 
@@ -1799,7 +1889,7 @@ function runOptimize(bedId) {
   if (diffCount > 0) {
     const accept = document.createElement('button'); accept.className='opt-accept-btn'; accept.textContent='Apply layout';
     accept.addEventListener('click', () => {
-      bedLayouts[bedId] = optimized;
+      bedLayouts[bedSeasonKey(bedId)] = optimized;
       saveLayouts();
       renderBed(bedId);
       previewPanel.classList.remove('visible');
@@ -1880,48 +1970,86 @@ function runOptimize(bedId) {
 const BEDS_DEF = [
   {
     id:'bedA', title:'Bed A — 40×58 in rounded rectangle',
-    meta:'East fence · near jasmine · AM full sun 5–7 hrs · cool season',
+    meta:'East fence · near jasmine · AM full sun 5–7 hrs',
     cols:3,
-    defaultLayout:['marigold','marigold','marigold','longevitysp','cubanoregano','longevitysp','okinawasp','basil','okinawasp','longevitysp','cubanoregano','longevitysp','marigold','marigold','marigold'],
-    companion:'Warm season: longevity spinach + Okinawa spinach as heat-tolerant ground cover. Cuban oregano deters pests. Basil center. Marigold border for nematode suppression. October: swap to kale, arugula, spinach, carrots, onion.',
-    stagger:[{week:'Week 1',color:'#639922',note:'Arugula + spinach direct sow'},{week:'Week 1',color:'#1D9E75',note:'Cilantro sow (Slo-Bolt)'},{week:'Week 3',color:'#97C459',note:'Arugula succession'},{week:'Week 5',color:'#C0DD97',note:'Spinach succession'}]
+    layouts:{
+      cool:  ['marigold','kale','marigold','spinach','arugula','spinach','onion','cilantro','onion','carrot','parsley','carrot','marigold','marigold','marigold'],
+      warm:  ['marigold','marigold','marigold','longevitysp','cubanoregano','longevitysp','okinawasp','basil','okinawasp','longevitysp','cubanoregano','longevitysp','marigold','marigold','marigold'],
+      summer:['marigold','marigold','marigold','okinawasp','lemongrass','okinawasp','okinawasp','cubanoregano','okinawasp','okinawasp','basil','okinawasp','marigold','marigold','marigold'],
+    },
+    companions:{
+      cool:  'Kale + spinach + arugula for cut-and-come-again. Cilantro succession every 3 weeks. Marigold border suppresses nematodes.',
+      warm:  'Longevity + Okinawa spinach as heat-tolerant ground cover. Cuban oregano deters pests. Basil center. Marigold border.',
+      summer:'Okinawa spinach thrives in full heat. Lemongrass deters whiteflies. Cuban oregano ground cover. Marigold holds nematodes.',
+    },
+    staggers:{
+      cool:  [{week:'Oct wk1',color:'#639922',note:'Arugula + spinach direct sow'},{week:'Oct wk1',color:'#1D9E75',note:'Cilantro sow (Slo-Bolt)'},{week:'Oct wk3',color:'#97C459',note:'Arugula succession'},{week:'Oct wk5',color:'#C0DD97',note:'Spinach succession'}],
+      warm:  [{week:'Feb wk2',color:'#085041',note:'Basil transplants in'},{week:'Feb wk3',color:'#5a7c2a',note:'Cuban oregano cuttings'},{week:'Mar wk1',color:'#1a5c3a',note:'Longevity spinach cuttings'}],
+      summer:[{week:'Jun wk1',color:'#1a5c3a',note:'Okinawa spinach cuttings'},{week:'Jun wk2',color:'#8aaa2a',note:'Lemongrass division'},{week:'Jul',color:'#5a7c2a',note:'Cuban oregano fill-in'}],
+    },
   },
   {
     id:'bedB', title:'Bed B — 40×58 in rounded rectangle',
-    meta:'East fence · near tiki hut · AM full sun 5–7 hrs · root veg + brassica',
+    meta:'East fence · near tiki hut · AM full sun 5–7 hrs',
     cols:3,
-    defaultLayout:['marigold','marigold','marigold','longevitysp','basil','longevitysp','okinawasp','lemongrass','okinawasp','longevitysp','basil','longevitysp','marigold','marigold','marigold'],
-    companion:'Nasturtium trap crop — aphids choose it over cabbage. Garlic beside kale acts as passive fungicide. Parsley attracts parasitic wasps.',
-    stagger:[{week:'Oct wk1',color:'#712B13',note:'Garlic cloves 4 in deep'},{week:'Oct wk2',color:'#173404',note:'Cabbage transplants'},{week:'Oct wk3',color:'#993C1D',note:'Carrots direct sow'},{week:'Nov wk1',color:'#D85A30',note:'Short-day onion sets only'}]
+    layouts:{
+      cool:  ['marigold','marigold','marigold','cabbage','garlic','cabbage','kale','carrot','kale','onion','spinach','onion','marigold','marigold','marigold'],
+      warm:  ['marigold','marigold','marigold','longevitysp','basil','longevitysp','okinawasp','lemongrass','okinawasp','longevitysp','basil','longevitysp','marigold','marigold','marigold'],
+      summer:['marigold','marigold','marigold','okinawasp','lemongrass','okinawasp','okinawasp','basil','okinawasp','okinawasp','cubanoregano','okinawasp','marigold','marigold','marigold'],
+    },
+    companions:{
+      cool:  'Nasturtium trap crop — aphids choose it over cabbage. Garlic beside kale acts as passive fungicide. Parsley attracts parasitic wasps.',
+      warm:  'Longevity spinach + lemongrass for heat tolerance. Basil deters whiteflies. Marigold border holds nematodes.',
+      summer:'Okinawa spinach + lemongrass only productive combo in peak heat. Cuban oregano as pest deterrent ground cover.',
+    },
+    staggers:{
+      cool:  [{week:'Oct wk1',color:'#712B13',note:'Garlic cloves 4 in deep'},{week:'Oct wk2',color:'#173404',note:'Cabbage transplants'},{week:'Oct wk3',color:'#993C1D',note:'Carrots direct sow'},{week:'Nov wk1',color:'#D85A30',note:'Short-day onion sets only'}],
+      warm:  [{week:'Feb wk2',color:'#085041',note:'Basil transplants in'},{week:'Feb wk3',color:'#8aaa2a',note:'Lemongrass division'},{week:'Mar wk1',color:'#1a5c3a',note:'Longevity spinach cuttings'}],
+      summer:[{week:'Jun wk1',color:'#1a5c3a',note:'Okinawa spinach cuttings'},{week:'Jun wk2',color:'#8aaa2a',note:'Lemongrass division'},{week:'Jul',color:'#5a7c2a',note:'Cuban oregano fill-in'}],
+    },
   },
   {
     id:'bedC', title:'Bed C — 41 in round bed',
     meta:'East fence · herb hub · year-round',
     cols:3,
-    defaultLayout:['marigold','basil','marigold','chives','lemongrass','chives','marigold','basil','marigold'],
-    companion:'Herb hub. Marigolds on all corners. Basil center. Green onion ring confuses pests. Cilantro and parsley catch edge sunlight.',
-    stagger:[{week:'Apr–Sep',color:'#085041',note:'Basil transplant, pinch flowers weekly'},{week:'Oct–Mar',color:'#1D9E75',note:'Cilantro every 3 weeks'},{week:'Year-round',color:'#5F5E5A',note:'Green onion resow as needed'}]
+    layouts:{
+      cool:  ['marigold','cilantro','marigold','parsley','greenonion','parsley','marigold','basil','marigold'],
+      warm:  ['marigold','basil','marigold','chives','lemongrass','chives','marigold','basil','marigold'],
+      summer:['marigold','basil','marigold','cubanoregano','lemongrass','cubanoregano','marigold','chives','marigold'],
+    },
+    companions:{
+      cool:  'Herb hub. Cilantro succession every 3 weeks. Green onion year-round. Parsley attracts beneficial wasps. Marigold corners.',
+      warm:  'Basil + lemongrass dominant. Chives deter ants carrying mealybugs. Marigold corners hold nematodes.',
+      summer:'Cuban oregano + lemongrass — two of the toughest FL heat herbs. Basil survives with consistent water. Chives persist.',
+    },
+    staggers:{
+      cool:  [{week:'Oct wk1',color:'#1D9E75',note:'Cilantro direct sow (Slo-Bolt)'},{week:'Oct wk3',color:'#1D9E75',note:'Cilantro succession'},{week:'Year-round',color:'#5F5E5A',note:'Green onion resow as needed'}],
+      warm:  [{week:'Feb wk2',color:'#085041',note:'Basil transplants in'},{week:'Apr',color:'#8aaa2a',note:'Lemongrass division or start'}],
+      summer:[{week:'Jun wk1',color:'#085041',note:'Basil — water daily in heat'},{week:'Jun',color:'#8aaa2a',note:'Lemongrass established — minimal care'}],
+    },
   },
 ];
+
+function bedSeasonKey(bedId, season) { return bedId + '_' + (season || currentSeason); }
+function bedDefaultLayout(def, season) { return def.layouts[season || currentSeason] || def.layouts.warm; }
 
 function renderBed(bedId) {
   const def = BEDS_DEF.find(b => b.id === bedId);
   if (!def) return;
-  // load saved layout or use default
-  const saved = loadLayouts();
-  bedLayouts[bedId] = saved[bedId] || [...def.defaultLayout];
-  const layout = bedLayouts[bedId];
+  const sk = bedSeasonKey(bedId);
+  if (!bedLayouts[sk]) bedLayouts[sk] = [...bedDefaultLayout(def)];
+  const layout = bedLayouts[sk];
   const existing = document.getElementById('bed-card-'+bedId);
   const card = buildBedCard(def, layout);
   if (existing) existing.replaceWith(card);
   else document.getElementById('beds-abc').appendChild(card);
-  // Rebuild palette UI to reflect current edit mode after re-render
   const toolbar = document.getElementById('toolbar-'+bedId);
   const palette = document.getElementById('palette-'+bedId);
   if (toolbar && palette) buildPalette(bedId, palette, toolbar);
 }
 
 function buildBedCard(def, layout) {
+  const s = SEASONS[currentSeason];
   const card = document.createElement('div');
   card.className='bed-wrap'; card.id='bed-card-'+def.id;
   card.innerHTML=`<div class="bed-name">${def.title}</div><div class="bed-meta">${def.meta}</div>`;
@@ -1953,12 +2081,14 @@ function buildBedCard(def, layout) {
   const info = document.createElement('div'); info.className='bed-info';
   info.appendChild(makeLegend(layout, null));
   const note = document.createElement('div'); note.className='companion-box';
-  note.innerHTML=`<strong>Companion logic:</strong> ${def.companion}`;
+  const companion = (def.companions && def.companions[currentSeason]) || def.companion || '';
+  note.innerHTML=`<strong>Companion logic:</strong> ${companion}`;
   info.appendChild(note);
   info.appendChild(makeCountGrid(layout, null));
-  info.appendChild(makeStagger(def.stagger));
+  const stagger = (def.staggers && def.staggers[currentSeason]) || def.stagger || [];
+  info.appendChild(makeStagger(stagger));
   // Soil & fertilizer panel based on current layout
-  const sfPlants = bedLayouts[def.id] || def.defaultLayout;
+  const sfPlants = bedLayouts[bedSeasonKey(def.id)] || bedDefaultLayout(def);
   const sfPanel = buildSoilFertPanel(sfPlants);
   if (sfPanel) info.appendChild(sfPanel);
   body.appendChild(info);
@@ -1966,17 +2096,93 @@ function buildBedCard(def, layout) {
   return card;
 }
 
-// Initial render
-bedLayouts = loadLayouts();
-BEDS_DEF.forEach(def => {
-  if (!bedLayouts[def.id]) bedLayouts[def.id] = [...def.defaultLayout];
-  document.getElementById('beds-abc').appendChild(buildBedCard(def, bedLayouts[def.id]));
+function buildSeasonSelector() {
+  const el = document.getElementById('season-selector');
+  if (!el) return;
+  el.innerHTML = '';
+  const bar = document.createElement('div'); bar.className = 'season-bar';
+  const lbl = document.createElement('span'); lbl.className = 'season-bar-label'; lbl.textContent = 'Season:';
+  bar.appendChild(lbl);
+  const auto = detectSeason();
+  SEASON_ORDER.forEach(sk => {
+    const s = SEASONS[sk];
+    const btn = document.createElement('button');
+    btn.className = 'season-btn ' + s.colorClass + (sk === currentSeason ? ' active' : '');
+    btn.innerHTML = `<span>${s.label}</span><span class="season-btn-months">${s.months}</span>`;
+    if (sk === auto) {
+      const badge = document.createElement('span'); badge.className = 'season-now-badge'; badge.textContent = 'now';
+      btn.appendChild(badge);
+    }
+    btn.addEventListener('click', () => {
+      if (sk === currentSeason) return;
+      currentSeason = sk;
+      // reset edit modes
+      Object.keys(editMode).forEach(k => editMode[k] = false);
+      selectedPlant = null;
+      // re-render all beds
+      BEDS_DEF.forEach(def => {
+        if (!bedLayouts[bedSeasonKey(def.id)]) bedLayouts[bedSeasonKey(def.id)] = [...bedDefaultLayout(def)];
+        renderBed(def.id);
+      });
+      // re-init bedD layouts for this season and redraw
+      const dsk = 'bedD_' + currentSeason;
+      if (!bedLayouts[dsk]) bedLayouts[dsk] = makeBedDLayout(currentSeason);
+      const dToolbar = document.getElementById('bedD-toolbar');
+      const dPalette = document.getElementById('bedD-palette');
+      if (dToolbar && dPalette) buildPalette('bedD', dPalette, dToolbar);
+      if (window.drawEBed) window.drawEBed();
+      buildSeasonSelector(); // re-render selector to update active state
+    });
+    bar.appendChild(btn);
+  });
+  const desc = document.createElement('span');
+  desc.style.cssText = 'font-size:11px;color:var(--ink-pale);margin-left:auto;text-align:right;line-height:1.3';
+  desc.textContent = SEASONS[currentSeason].desc;
+  bar.appendChild(desc);
+  el.appendChild(bar);
+}
+
+// Initial render — deferred until remote data syncs into localStorage
+gardenReady.then(() => {
+  bedLayouts = loadLayouts();
+  // Migrate old single-layout keys (bedA → bedA_warm etc) if present
+  BEDS_DEF.forEach(def => {
+    if (bedLayouts[def.id] && !bedLayouts[def.id + '_warm']) {
+      bedLayouts[def.id + '_warm'] = bedLayouts[def.id];
+    }
+  });
+  // Init all season layouts for A/B/C
+  BEDS_DEF.forEach(def => {
+    SEASON_ORDER.forEach(s => {
+      const sk = bedSeasonKey(def.id, s);
+      if (!bedLayouts[sk]) bedLayouts[sk] = [...bedDefaultLayout(def, s)];
+    });
+    document.getElementById('beds-abc').appendChild(buildBedCard(def, bedLayouts[bedSeasonKey(def.id)]));
+  });
+  // Init Bed D layouts for all seasons
+  SEASON_ORDER.forEach(s => {
+    const dsk = 'bedD_' + s;
+    if (!bedLayouts[dsk]) bedLayouts[dsk] = makeBedDLayout(s);
+  });
+  // Wire bedD toolbar/palette
+  const dToolbar = document.getElementById('bedD-toolbar');
+  const dPalette = document.getElementById('bedD-palette');
+  if (dToolbar && dPalette) buildPalette('bedD', dPalette, dToolbar);
+  if (window.drawEBed) window.drawEBed();
+  buildSeasonSelector();
 });
 
-/* ═══════════ BED D SEASON TOGGLE + E-SHAPE CANVAS ═══════════ */
-let bedDCoolSeason = false;
-const BEDD_WARM_LAYOUT = [];
-const BEDD_COOL_LAYOUT = [];
+/* ═══════════ BED D E-SHAPE CANVAS ═══════════ */
+const BEDD_COLS = 20, BEDD_ROWS = 4;
+function isBeddCell(r,c){ return r<=1||(c<=3)||(c>=8&&c<=11)||(c>=16&&c<=19); }
+function makeBedDLayout(season) {
+  const fn = season==='cool' ? plantAtCool : season==='summer' ? plantAtSummer : plantAtWarm;
+  const out=[];
+  for(let r=0;r<BEDD_ROWS;r++)
+    for(let c=0;c<BEDD_COLS;c++)
+      out.push(isBeddCell(r,c)?fn(r,c):'_void');
+  return out;
+}
 
 function plantAtWarm(r,c) {
   const inL=c<=3,inC=c>=8&&c<=11,inR=c>=16&&c<=19;
@@ -2007,15 +2213,19 @@ function plantAtCool(r,c) {
   return'cilantro';
 }
 
-function toggleBedDSeason() {
-  bedDCoolSeason = !bedDCoolSeason;
-  const toggle = document.getElementById('bedD-toggle');
-  const label  = document.getElementById('bedD-label');
-  toggle.classList.toggle('off', bedDCoolSeason);
-  label.innerHTML = bedDCoolSeason
-    ? '<strong>Cool season</strong> — kale, spinach, arugula, carrots'
-    : '<strong>Warm season</strong> — tomato, pepper, cantaloupe, basil';
-  drawEBed();
+function plantAtSummer(r,c) {
+  const inL=c<=3,inC=c>=8&&c<=11,inR=c>=16&&c<=19;
+  const lc=inL?c:inC?c-8:inR?c-16:c;
+  if(r<=1){
+    if(r===0)return(c===0||c===19||c===3||c===8||c===11||c===16)?'marigold':'marigold';
+    if(inL)return lc%2===0?'okinawasp':'basil';
+    if(inC)return lc%2===0?'okinawasp':'cubanoregano';
+    if(inR)return lc%2===0?'okinawasp':'basil';
+    return lc%3===0?'pepper':'basil';
+  }
+  if(r===3)return(lc===0||lc===3)?'nasturtium':'marigold';
+  if(r===2){if(lc===0||lc===3)return'marigold';if(inC)return lc===1?'okinawasp':'cubanoregano';return lc%2===0?'okinawasp':'basil';}
+  return'basil';
 }
 
 (function initEBed() {
@@ -2160,14 +2370,18 @@ function toggleBedDSeason() {
     ctx.fillText('↑ muscadine trellis  ·  Bed D back bar ↓', PAD+(COLS*STEP-GAP)/2, DIVY+8);
 
     
-    lbl('BED D — E-shape  ('+(bedDCoolSeason?'cool':'warm')+' season · tap Edit tiles to swap)',PAD,BEDY-8,'left',8);
+    lbl('BED D — E-shape  ('+SEASONS[currentSeason].label+' · tap Edit tiles to swap)',PAD,BEDY-8,'left',8);
 
     hitMap.length=0;
     for(let r=0;r<ROWS;r++){
       for(let c=0;c<COLS;c++){
         const x=PAD+c*STEP, y=BEDY+r*STEP;
         if(isBed(r,c)){
-          const key = bedDCoolSeason ? plantAtCool(r,c) : plantAtWarm(r,c);
+          const sk = 'bedD_' + currentSeason;
+          const bLayout = bedLayouts[sk];
+          const savedKey = bLayout && bLayout[r*COLS+c];
+          const defaultFn = currentSeason==='cool' ? plantAtCool : currentSeason==='summer' ? plantAtSummer : plantAtWarm;
+          const key = (savedKey && savedKey !== '_void' && savedKey !== 'empty') ? savedKey : defaultFn(r,c);
           drawC(x,y,key);
           hitMap.push({x,y,key,r,c});
         } else { drawV(x,y); hitMap.push({x,y,key:'_void'}); }
@@ -2226,12 +2440,25 @@ function toggleBedDSeason() {
     const mx=(ex-r.left)*sx, my=(ey-r.top)*sy;
     const h=hitMap.find(h=>mx>=h.x&&mx<=h.x+CS&&my>=h.y&&my<=h.y+CS);
     if(!h||h.key==='_void') { if(!isTap) tip.style.display='none'; return; }
-    if(isTap) { showTip({clientX:ex,clientY:ey}, h.key); setTimeout(()=>tip.style.display='none',2500); }
-    else showTip({clientX:ex,clientY:ey}, h.key);
+    if(isTap) {
+      if(editMode['bedD'] && selectedPlant && h.key !== '_void') {
+        swapTile('bedD', h.r * COLS + h.c, selectedPlant);
+      } else {
+        showTip({clientX:ex,clientY:ey}, h.key); setTimeout(()=>tip.style.display='none',2500);
+      }
+    } else showTip({clientX:ex,clientY:ey}, h.key);
   }
   cv.addEventListener('mousemove', e => handleCanvasInteraction(e, false));
   cv.addEventListener('mouseleave', () => tip.style.display='none');
   cv.addEventListener('touchstart', e => { e.preventDefault(); handleCanvasInteraction(e, true); }, {passive:false});
+  cv.addEventListener('click', e => {
+    const rb=cv.getBoundingClientRect(), sx=cv.width/rb.width, sy=cv.height/rb.height;
+    const mx=(e.clientX-rb.left)*sx, my=(e.clientY-rb.top)*sy;
+    const h=hitMap.find(h=>mx>=h.x&&mx<=h.x+CS&&my>=h.y&&my<=h.y+CS);
+    if(!h||h.key==='_void') return;
+    if(editMode['bedD'] && selectedPlant) { swapTile('bedD', h.r*COLS+h.c, selectedPlant); }
+    else { showTip(e, h.key); setTimeout(()=>tip.style.display='none',2500); }
+  });
 
   // Resize
   window.addEventListener('resize', () => {
@@ -2283,7 +2510,7 @@ function toggleBedDSeason() {
 })();
 
 /* ═══════════ THIS WEEK ═══════════ */
-(function(){
+gardenReady.then(function(){
   const TASKS=[
     {id:'t1',tag:'harvest',title:'Harvest cool-season greens',detail:'Cut kale, spinach, arugula before they bolt. Heat coming in May ends their season — take what you can now.'},
     {id:'t2',tag:'plant',  title:'Plant basil in all beds',detail:'Perfect window. Basil loves the warming temps. Put transplants beside tomatoes in Bed D and center of Bed C.'},
@@ -2310,15 +2537,15 @@ function toggleBedDSeason() {
       const isDone=done.includes(task.id);
       const card=document.createElement('div'); card.className='task-card'+(isDone?' done':'');
       card.innerHTML=`<div class="task-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="task-tag ${tagC[task.tag]}">${tagL[task.tag]}</div><div class="task-title">${task.title}</div><div class="task-detail">${task.detail}</div></div>`;
-      card.addEventListener('click',()=>{ if(done.includes(task.id)) done=done.filter(d=>d!==task.id); else done.push(task.id); localStorage.setItem(KEY,JSON.stringify(done)); render(); });
+      card.addEventListener('click',()=>{ if(done.includes(task.id)) done=done.filter(d=>d!==task.id); else done.push(task.id); localStorage.setItem(KEY,JSON.stringify(done)); GardenDB.set(KEY,done); render(); });
       grid.appendChild(card);
     });
   }
   render();
-})();
+});
 
 /* ═══════════ PLANT HEALTH TRACKER ═══════════ */
-(function(){
+gardenReady.then(function(){
   const TRACKED=[
     {id:'p_kale_a',key:'kale',name:'Kale',bed:'Bed A'},{id:'p_arugula_a',key:'arugula',name:'Arugula',bed:'Bed A'},
     {id:'p_spinach_a',key:'spinach',name:'Spinach',bed:'Bed A'},{id:'p_cilantro_a',key:'cilantro',name:'Cilantro',bed:'Bed A'},
@@ -2332,7 +2559,7 @@ function toggleBedDSeason() {
   ];
   const STOR='garden_health_v1';
   const load=()=>JSON.parse(localStorage.getItem(STOR)||'{}');
-  const save=d=>localStorage.setItem(STOR,JSON.stringify(d));
+  const save=d=>{localStorage.setItem(STOR,JSON.stringify(d));GardenDB.set(STOR,d);};
   const hL=['','Poor','Fair','Good','Great','Thriving'];
   const hC=['','#E24B4A','#EF9F27','#97C459','#4a7c23','#2d5016'];
   function renderTracker(){
@@ -2356,13 +2583,13 @@ function toggleBedDSeason() {
     });
   }
   renderTracker();
-})();
+});
 
 /* ═══════════ LOG ═══════════ */
-(function(){
+gardenReady.then(function(){
   const STOR='garden_log_v1';
   const loadLog=()=>JSON.parse(localStorage.getItem(STOR)||'[]');
-  const saveLog=e=>localStorage.setItem(STOR,JSON.stringify(e));
+  const saveLog=e=>{localStorage.setItem(STOR,JSON.stringify(e));GardenDB.set(STOR,e);};
   const tL={water:'Watering',harvest:'Harvest',pest:'Pest spotted',note:'Note'};
   const tC={water:'log-water',harvest:'log-harvest',pest:'log-pest',note:'log-note'};
   function renderLog(){
@@ -2390,7 +2617,7 @@ function toggleBedDSeason() {
   window.clearLog=function(){ if(confirm('Clear all log entries?')){ saveLog([]); renderLog(); } };
   document.getElementById('log-note-text').addEventListener('keydown',e=>{ if(e.key==='Enter') addLogEntry(); });
   renderLog();
-})();
+});
 
 
 /* ═══════════ GROW BAG SYSTEM ═══════════ */
@@ -2426,6 +2653,7 @@ function loadGrowBags() {
 }
 function saveGrowBags(bags) {
   localStorage.setItem(GB_STORAGE, JSON.stringify(bags));
+  GardenDB.set(GB_STORAGE, bags);
 }
 
 function renderGrowBags() {
@@ -2654,19 +2882,18 @@ function saveGrowBag(idx) {
   renderGrowBags();
 }
 
-// Ensure the three starter grow bags always exist (runs once at page load)
-(function() {
-  const bags = JSON.parse(localStorage.getItem(GB_STORAGE) || '[]');
+// Seed starter bags and render — deferred until remote data syncs
+gardenReady.then(() => {
+  const bags = loadGrowBags();
   const names = bags.map(b => b.name);
   const toAdd = [
     { name: 'Carrie Mango #1',    plant: 'carriemango',    gallons: 25, notes: 'Start in 15 gal, repot to 25 gal for peak production. South yard full sun.', createdAt: Date.now() },
     { name: 'Fairchild Mango #1', plant: 'fairchildmango', gallons: 25, notes: 'Plant alongside Carrie. Both need same care. 25 gal optimal.', createdAt: Date.now()+1 },
     { name: 'FL Best Peach #1',   plant: 'flbestpeach',    gallons: 30, notes: '30 gal for optimal root development. Full sun 8+ hrs. Fruit expected May.', createdAt: Date.now()+2 },
   ].filter(s => !names.includes(s.name));
-  if (toAdd.length) localStorage.setItem(GB_STORAGE, JSON.stringify([...bags, ...toAdd]));
-})();
-
-renderGrowBags();
+  if (toAdd.length) saveGrowBags([...bags, ...toAdd]);
+  renderGrowBags();
+});
 
 function editGrowBag(idx) { openGrowBagModal(idx); }
 
@@ -2681,9 +2908,6 @@ function deleteGrowBag(idx) {
 function closeGrowBagModal() {
   document.getElementById('gb-modal-backdrop')?.classList.add('hidden');
 }
-
-// Init grow bags
-renderGrowBags();
 
 /* ═══════════ TABS ═══════════ */
 function switchPage(page) {
