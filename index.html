@@ -1005,6 +1005,7 @@ const PLANTS = {
   chives:        {bg:'#4a8a4a',label:'Chives',               sqft:1,  note:'Deters ants that carry mealybugs. Good guava companion. Perennial.'},
   seminolepumpkin:{bg:'#d47a1a',label:'Seminole Pumpkin',   sqft:4,  note:'FL heritage variety. Extremely heat tolerant. Train vines to trellis.'},
   roselle:        {bg:'#c4204a',label:'Roselle',             sqft:1,  note:'Hibiscus sabdariffa. Full sun, drought tolerant. Plant Mar–May; harvest calyces Nov–Jan. Gets 4–6 ft tall — place at bed edge or fence.'},
+  soil:           {bg:'#5c3d1a',label:'Soil',               sqft:0,  note:'Bare/mulched soil. Use to mark intentionally empty or mulched space.'},
 };
 
 // Legacy aliases for backwards compat
@@ -1433,6 +1434,8 @@ const PX={
   starfruit:     [[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,1,1,0,1,0],[1,1,1,0,1,1,1,0],[0,1,1,1,1,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,1,0,0,0],[0,0,0,1,1,0,0,0]],
   sugarapple:    [[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,1,1,0,1,1],[1,0,1,0,0,1,0,1],[1,0,0,1,1,0,0,1],[0,1,1,0,0,1,1,0],[0,0,1,1,1,1,0,0],[0,0,0,1,1,0,0,0]],
   pomegranate:   [[0,0,1,1,1,1,0,0],[0,1,1,0,0,1,1,0],[1,1,0,0,0,0,1,1],[1,0,0,1,1,0,0,1],[1,0,1,1,1,1,0,1],[0,1,1,0,0,1,0,0],[0,0,1,1,1,0,0,0],[0,0,0,1,1,0,0,0]],
+  roselle:       [[0,0,1,0,1,0,0,0],[0,1,0,1,0,1,0,0],[1,0,1,1,1,0,1,0],[0,1,1,0,1,1,0,0],[1,0,1,1,0,1,0,0],[0,1,0,0,1,0,1,0],[0,0,1,0,0,1,0,0],[0,0,0,1,1,0,0,0]],
+  soil:          [[1,0,1,0,0,1,0,1],[0,0,0,0,1,0,0,0],[0,1,0,0,0,0,1,0],[1,0,0,1,0,0,0,1],[0,0,1,0,0,1,0,0],[1,0,0,0,1,0,1,0],[0,1,0,1,0,0,0,0],[0,0,1,0,0,1,0,1]],
 };
 
 /* ═══════════ SEASONS ═══════════ */
@@ -1565,6 +1568,7 @@ const PALETTE_GROUPS = [
   { label: 'Herbs',      keys: ['basil','cubanoregano','zaatar','lemongrass','chives','cilantro','parsley','greenonion','ginger','turmeric'] },
   { label: 'Flowers & companions', keys: ['marigold','nasturtium','borage','calendula'] },
   { label: 'Greens',     keys: ['kale','spinach','arugula'] },
+  { label: 'Utility',   keys: ['soil'] },
 ];
 
 function buildPalette(bedId, containerEl, toolbarEl) {
